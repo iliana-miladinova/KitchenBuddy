@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: 'merriweather';
+    background-color: #fdfbd4;
+    line-height: 1.8;
+
+}
+
+a{
+    text-decoration: none;
+}
+
+#container{
+    max-width: 430px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.form-wrap{
+    background-color: #fff;
+    padding: 15px 25px;
+    color: #5D4037;
+    border-top: 4px solid #5D4037;
+    border-radius: 05px;
+}
+
+.form-wrap h1{
+    text-align: center;
+}
+
+.form-wrap .form-group{
+    margin-top: 5px;
+}
+
+.form-wrap .form-group label{
+    display: block;
+}
+
+.form-wrap .form-group input{
+    width: 100%;
+    padding: 5px;
+    font-family: 'merriweather';
+    border: #ddd 1px solid;
+    border-radius: 5px;
+}
+
+.form-wrap button{
+    display: block;
+    width: 100%;
+    padding: 5px;
+    margin-top: 35px;
+    background-color: #A0522D;
+    color: #FFFFF0;
+    cursor: pointer;
+    border: #A0522D 1px solid;
+    border-radius: 5px;
+    font-family: 'merriweather';
+    font-size: 15px;
+    transition: 1s;
+}
+
+.form-wrap button:hover{
+    background-color: #8B4513;
+    transition: 1s;
+}
+
+footer{
+    text-align: center;
+    margin-top: 5px;
+    color: #5D4037;
+}
