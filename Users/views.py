@@ -47,7 +47,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            redirect('home')
+            return redirect('home')
         else:
             messages.error(request, 'Incorrect username or password')
             return render(request, 'Users/login.html')
