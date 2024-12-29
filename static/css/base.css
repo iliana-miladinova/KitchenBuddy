@@ -1,0 +1,45 @@
+body{
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    box-sizing: border-box;
+    margin: 0;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+}
+
+html {
+    overflow: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+a{
+    text-decoration: none;
+    color: #FFFFF0;
+}
+
+.navbar {
+    padding: 0; /* Remove extra padding in the navbar */
+}
+
+.navbar .navbar-brand {
+    margin-left: 0; /* Push the brand to the very left */
+    display: flex;
+    align-items: center; /* Vertically align the logo and text */
+}
+
+.navbar .logo {
+    display: block;
+    margin: 0 auto;
+    transition: width 0.3s ease-in-out;
+    width: 60px; /* Adjust size of the logo */
+    margin-right: 10px; /* Add spacing between logo and text */
+}
+
+.brand-title {
+    font-size: 1.5rem; /* Adjust title font size */
+    font-weight: bold;
+} 
