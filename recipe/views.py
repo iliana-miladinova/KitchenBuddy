@@ -17,13 +17,13 @@ def list_recipe(request):
 
     sorting = sorting_options.get(sort_by, 'title')
     #Get all the recipes per user
-    #users_recipes = Recipe.objects.filter(user=request.user).order_by(sorting)
+    users_recipes = Recipe.objects.filter(user=request.user).order_by(sorting)
 
     #Get all the recipes
     all_recipes = Recipe.objects.all().order_by(sorting)
 
     context = {
-        #'users_recipes': users_recipes,
+        'users_recipes': users_recipes,
         'all_recipes': all_recipes,
         'sort_by': sort_by,
         'sorting_options': sorting_options
