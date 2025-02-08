@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Update Recipe: {{ recipe.title }}</h2>
+    
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="title" class="form-label">Recipe Title</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ recipe.title }}" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required>{{ recipe.description }}</textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label for="ingredients" class="form-label">Ingredients</label>
+            <textarea class="form-control" id="ingredients" name="ingredients" rows="3" required>{{ recipe.ingredients }}</textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label for="cooking_time" class="form-label">Cooking Time (minutes)</label>
+            <input type="number" class="form-control" id="cooking_time" name="cooking_time" value="{{ recipe.cooking_time }}" min="1" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="calories" class="form-label">Calories</label>
+            <input type="number" class="form-control" id="calories" name="calories" value="{{ recipe.calories }}" min="0" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="image" class="form-label">Recipe Image</label>
+            {% if recipe.image %}
+                <p>Current image: {{ recipe.image.name }}</p>
+            {% endif %}
+            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            <small class="text-muted">Leave empty to keep current image</small>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Update Recipe</button>
+        <a href="{% url 'recipe_details' recipe_id=recipe.id %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

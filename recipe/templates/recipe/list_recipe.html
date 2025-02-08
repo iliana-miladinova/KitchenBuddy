@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'recipe/list_recipe.css' %}" />
+
+<div class="recipe-header">
+    <h1 class="recipe-title">My Recipes</h1>
+    <button
+        type="button"
+        class="btn btn-primary create-recipe-btn"
+        data-bs-toggle="modal"
+        data-bs-target="#createRecipeModal"
+    >
+        <i class="fas fa-plus"></i> Create Recipe
+    </button>
+</div>
+
+<div class="recipe-sections">
+    <!-- Sorting Section -->
+    <section class="recipe-section">
+        <h2 class="section-title">
+            <i class="fas fa-sort"></i>
+            Sort Recipes
+        </h2>
+        <select class="form-select" onchange="window.location.href='?sort_by=' + this.value">
+            {% for key, value in sorting_options.items %}
+                <option value="{{ key }}" {% if sort_by == key %}selected{% endif %}>
+                    Sort by {{ value }}
+                </option>
+            {% endfor %}
+        </select>
+    </section>
+
+    <!-- User's Recipes Section -->
+    <section class="recipe-section">
+        <h2 class="section-title">
+            <i class="fas fa-utensils"></i>
+            Your Recipes
+        </h2>
+        {% if users_recipes %}
+            <div class="recipes-container">
+                {% for recipe in users_recipes %}
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+                            {% endif %}
+                        </div>
+                        <div class="recipe-details">
+                            <h3>{{ recipe.title }}</h3>
+                            <div class="recipe-info">
+                                <p><i class="fas fa-star"></i> Rating: {{ recipe.average_rating|floatformat:1 }}</p>
+                                <p><i class="fas fa-clock"></i> Time: {{ recipe.cooking_time }} mins</p>
+                                <p><i class="fas fa-fire"></i> Calories: {{ recipe.calories }}</p>
+                            </div>
+                            <div class="recipe-actions">
+                                <a href="{% url 'recipe_details' recipe.id %}" class="btn btn-primary">View</a>
+                                <a href="{% url 'recipe_update' recipe.id %}" class="btn btn-secondary">Edit</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-recipes-message">You haven't created any recipes yet!</p>
+        {% endif %}
+    </section>
+
+    <!-- All Recipes Section -->
+    <section class="recipe-section">
+        <h2 class="section-title">
+            <i class="fas fa-book-open"></i>
+            All Recipes
+        </h2>
+        {% if all_recipes %}
+            <div class="recipes-container">
+                {% for recipe in all_recipes %}
+                    <div class="recipe-card">
+                        <div class="recipe-image">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
+                            {% endif %}
+                        </div>
+                        <div class="recipe-details">
+                            <h3>{{ recipe.title }}</h3>
+                            <div class="recipe-info">
+                                <p><i class="fas fa-star"></i> Rating: {{ recipe.average_rating|floatformat:1 }}</p>
+                                <p><i class="fas fa-clock"></i> Time: {{ recipe.cooking_time }} mins</p>
+                                <p><i class="fas fa-fire"></i> Calories: {{ recipe.calories }}</p>
+                            </div>
+                            <div class="recipe-actions">
+                                <a href="{% url 'recipe_details' recipe.id %}" class="btn btn-primary">View</a>
+                                {% if request.user == recipe.user %}
+                                    <a href="{% url 'recipe_update' recipe.id %}" class="btn btn-secondary">Edit</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-recipes-message">No recipes available!</p>
+        {% endif %}
+    </section>
+</div>
+
+{% include "create_recipe_modal.html" %}
+{% endblock %}
