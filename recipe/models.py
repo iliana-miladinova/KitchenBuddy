@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from ingredients.models import Ingredient
+from foodPreference.models import Allergy, Diet
 
 # Create your models here.
 
@@ -16,6 +17,9 @@ class Recipe(models.Model):
 
     average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
     ratings_count = models.PositiveBigIntegerField(default=0)
+
+    diet = models.ManyToManyField(Diet, related_name='recipe_diet', blank=True)
+    allergies = models.ManyToManyField(Allergy, related_name='recipe_allergies', blank=True)
     #image_url = models.CharField(max_length=500, null=True, blank=True)
     
     class Meta:

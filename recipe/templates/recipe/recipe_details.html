@@ -65,10 +65,36 @@
                 </div>
             </div>
 
-            <!-- Add these sections -->
+           
             <div class="recipe-description">
                 <h3>Description</h3>
                 <p>{{ recipe.description }}</p>
+            </div>
+
+            <div class="recipe-diets">
+                <h3>Dietary Preferences</h3>
+                <ul class="ingredients-list">  <!-- Използваме същия клас за консистентност -->
+                    {% for diet in recipe.diet.all %}
+                        <li class="ingredient-item">  <!-- Използваме същия клас за консистентност -->
+                            {{ diet.name }}
+                        </li>
+                    {% empty %}
+                        <li>No dietary preferences listed</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        
+            <div class="recipe-allergens">
+                <h3>Allergens Present</h3>
+                <ul class="ingredients-list">  <!-- Използваме същия клас за консистентност -->
+                    {% for allergen in recipe.allergies.all %}
+                        <li class="ingredient-item">  <!-- Използваме същия клас за консистентност -->
+                            {{ allergen.name }}
+                        </li>
+                    {% empty %}
+                        <li>No allergens listed</li>
+                    {% endfor %}
+                </ul>
             </div>
 
             <div class="recipe-ingredients">

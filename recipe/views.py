@@ -6,6 +6,7 @@ from django.core.paginator import Paginator
 from django.db import models
 from .models import Recipe, Rating, Comment, IngredientsDetails
 from ingredients.models import Ingredient
+from foodPreference.models import Allergy, Diet
 
 # Create your views here.
 @login_required
@@ -24,12 +25,27 @@ def list_recipe(request):
     all_recipes = Recipe.objects.all().order_by(sorting)
     ingredients = Ingredient.objects.all().order_by('category', 'name')
 
+    diets = Diet.objects.all().order_by('name')
+    allergies = Allergy.objects.all().order_by('name')
+
+    filtered_recipes_diets = request.GET.getlist('diets_filter')
+    if filtered_recipes_diets:
+        users_recipes = users_recipes.filter(diet__id__in=filtered_recipes_diets).distinct()
+        all_recipes = all_recipes.filter(diet__id__in=filtered_recipes_diets).distinct()
+
+    filtered_recipes_allergies = request.GET.getlist('allergies_filter')
+    if filtered_recipes_allergies:
+        users_recipes = users_recipes.exclude(allergies__id__in=filtered_recipes_allergies).distinct()
+        all_recipes=all_recipes.exclude(allergies__id__in=filtered_recipes_allergies).distinct()
+
     context = {
         'users_recipes': users_recipes,
         'all_recipes': all_recipes,
         'sort_by': sort_by,
         'sorting_options': sorting_options,
-        'ingredients': ingredients
+        'ingredients': ingredients,
+        'diets': diets,          
+        'allergies': allergies
     }
 
     return render(request, 'recipe/list_recipe.html', context)
@@ -48,6 +64,14 @@ def recipe_create(request):
                                        cooking_time=cooking_time, calories=calories,
                                        image=image)
         
+        diets = request.POST.getlist('diet[]')
+        if diets:
+            recipe.diet.set(diets)
+        
+        allergies = request.POST.getlist('allergy[]')
+        if allergies:
+            recipe.allergies.set(allergies)
+
         ingredients = request.POST.getlist('ingredient[]')
         quantity = request.POST.getlist('quantity[]')
         amount = request.POST.getlist('amount[]')
@@ -57,6 +81,13 @@ def recipe_create(request):
 
             IngredientsDetails.objects.create(recipe=recipe, ingredient=ingredient, quantity=quantity[ing], amount=amount[ing])
 
+        # context = {
+        # 'ingredients': Ingredient.objects.all().order_by('category', 'name'),
+        # 'dietary_preferences': Diet.objects.all().order_by('name'),  
+        # 'allergens': Allergy.objects.all().order_by('name'),
+        # 'users_recipes': Recipe.objects.filter(user=request.user),
+        # 'all_recipes': Recipe.objects.all()
+        # }
         
         return redirect('list_recipe')
 
