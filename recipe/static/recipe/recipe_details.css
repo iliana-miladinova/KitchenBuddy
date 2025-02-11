@@ -150,6 +150,21 @@
     gap: 0.5rem;
 }
 
+.ingredients-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.ingredient-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.ingredient-item:last-child {
+    border-bottom: none;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .recipe-stats {

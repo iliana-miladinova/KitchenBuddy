@@ -105,5 +105,114 @@
     </section>
 </div>
 
-{% include "create_recipe_modal.html" %}
+<!-- Create Recipe Modal -->
+<div class="modal fade" id="createRecipeModal" tabindex="-1" aria-labelledby="createRecipeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createRecipeModalLabel">Create New Recipe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'recipe_create' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-group mb-3">
+                        <label for="title">Recipe Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Ingredients</label>
+                        <div id="ingredients-container">
+                            <div class="ingredient-row mb-3">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <select class="form-control ingredient-select" name="ingredient[]" required>
+                                            <option value="">Select ingredient</option>
+                                            {% regroup ingredients by get_category_display as ingredient_list %}
+                                            {% for category in ingredient_list %}
+                                                <optgroup label="{{ category.grouper }}">
+                                                    {% for ingredient in category.list %}
+                                                        <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
+                                                    {% endfor %}
+                                                </optgroup>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control" name="amount[]" placeholder="Unit (g, ml, etc)" required>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger remove-ingredient">×</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-secondary" id="add-ingredient">+ Add Ingredient</button>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="description">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="cooking_time">Cooking Time (minutes)</label>
+                        <input type="number" class="form-control" id="cooking_time" name="cooking_time" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="calories">Calories</label>
+                        <input type="number" class="form-control" id="calories" name="calories" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="image">Recipe Image</label>
+                        <input type="file" class="form-control" id="image" name="image">
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Create Recipe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('ingredients-container');
+    const addButton = document.getElementById('add-ingredient');
+
+    addButton.addEventListener('click', function() {
+        const newRow = container.children[0].cloneNode(true);
+        // Clear the values
+        newRow.querySelectorAll('input').forEach(input => input.value = '');
+        newRow.querySelector('select').value = '';
+        
+        // Add remove functionality
+        newRow.querySelector('.remove-ingredient').addEventListener('click', function() {
+            if (container.children.length > 1) {
+                this.closest('.ingredient-row').remove();
+            }
+        });
+
+        container.appendChild(newRow);
+    });
+
+    // Add remove functionality to the first row
+    document.querySelector('.remove-ingredient').addEventListener('click', function() {
+        if (container.children.length > 1) {
+            this.closest('.ingredient-row').remove();
+        }
+    });
+});
+</script>
+
 {% endblock %}

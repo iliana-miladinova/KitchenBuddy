@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Търсене на рецепти по съставки</h2>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="ingredients">Избери съставки:</label>
+                    <select multiple class="form-control" id="ingredients" name="ingredients" size="8">
+                        {% regroup ingredients by get_category_display as ingredient_list %}
+                        {% for category in ingredient_list %}
+                            <optgroup label="{{ category.grouper }}">
+                                {% for ingredient in category.list %}
+                                    <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">Задръж Ctrl (Cmd на Mac) за избор на множество съставки</small>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Търси рецепти</button>
+            </form>
+        </div>
+        
+        <div class="col-md-8">
+            {% if recipes %}
+                <h3>Намерени рецепти:</h3>
+                <div class="row">
+                {% for recipe in recipes %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            {% if recipe.image %}
+                                <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ recipe.title }}</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Рейтинг: {{ recipe.average_rating|floatformat:1 }} ({{ recipe.ratings_count }} гласа)
+                                    </small>
+                                </p>
+                                <a href="{% url 'recipe_details' recipe.id %}" class="btn btn-primary">Виж детайли</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            {% elif request.method == 'POST' %}
+                <div class="alert alert-info">
+                    Не са намерени рецепти с избраните съставки.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

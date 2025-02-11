@@ -4,7 +4,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db import models
-from .models import Recipe, Rating, Comment
+from .models import Recipe, Rating, Comment, IngredientsDetails
+from ingredients.models import Ingredient
 
 # Create your views here.
 @login_required
@@ -21,12 +22,14 @@ def list_recipe(request):
 
     #Get all the recipes
     all_recipes = Recipe.objects.all().order_by(sorting)
+    ingredients = Ingredient.objects.all().order_by('category', 'name')
 
     context = {
         'users_recipes': users_recipes,
         'all_recipes': all_recipes,
         'sort_by': sort_by,
-        'sorting_options': sorting_options
+        'sorting_options': sorting_options,
+        'ingredients': ingredients
     }
 
     return render(request, 'recipe/list_recipe.html', context)
@@ -36,24 +39,37 @@ def recipe_create(request):
     if request.method == 'POST':
         title = request.POST['title']
         description = request.POST['description']
-        ingredients = request.POST['ingredients']
+        #ingredients = request.POST['ingredients']
         cooking_time = request.POST['cooking_time']
         calories = request.POST['calories']
         image = request.FILES['image']
 
         recipe = Recipe.objects.create(user=request.user, title=title, description=description,
-                                       ingredients=ingredients, cooking_time=cooking_time, calories=calories,
+                                       cooking_time=cooking_time, calories=calories,
                                        image=image)
+        
+        ingredients = request.POST.getlist('ingredient[]')
+        quantity = request.POST.getlist('quantity[]')
+        amount = request.POST.getlist('amount[]')
+
+        for ing in range(len(ingredients)):
+            ingredient = Ingredient.objects.get(id=ingredients[ing])
+
+            IngredientsDetails.objects.create(recipe=recipe, ingredient=ingredient, quantity=quantity[ing], amount=amount[ing])
+
         
         return redirect('list_recipe')
 
 @login_required
 def recipe_details(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
+    #ingredients = recipe.ingredients.all()
+    ingredients = IngredientsDetails.objects.filter(recipe=recipe)
     comments = recipe.comment.all()
 
     context = {
         'recipe': recipe,
+        'ingredients': ingredients,
         'comments': comments
     }
 
@@ -66,14 +82,14 @@ def recipe_update(request, recipe_id):
         # Get form data
             title = request.POST['title']
             description = request.POST['description']
-            ingredients = request.POST['ingredients']
+            #ingredients = request.POST['ingredients']
             cooking_time = request.POST['cooking_time']
             calories = request.POST['calories']
         
         # Update recipe fields
             recipe.title = title
             recipe.description = description
-            recipe.ingredients = ingredients
+            #recipe.ingredients = ingredients
             recipe.cooking_time = cooking_time
             recipe.calories = calories
         
@@ -82,6 +98,18 @@ def recipe_update(request, recipe_id):
                 recipe.image = request.FILES['image']
 
             recipe.save()
+
+            recipe.ingredients.all().delete()
+
+            ingredients = request.POST.getlist('ingredient')
+            quantity = request.POST.getlist('quantity')
+            amount = request.POST.getlist('amount')
+
+            for ing in range(len(ingredients)):
+                ingredient = Ingredient.objects.get(id=ingredients[ing])
+
+                IngredientsDetails.objects.create(recipe=recipe, ingredient=ingredient, quantity=quantity[ing], amount=amount[ing])
+            
             return redirect('recipe_details', recipe_id=recipe_id)
         
     return redirect('recipe_details', recipe_id=recipe_id)

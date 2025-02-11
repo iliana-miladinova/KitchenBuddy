@@ -1,0 +1,38 @@
+/* Стилове за формата за избор */
+.select-ingredients {
+    margin-bottom: 2rem;
+}
+
+/* Стилове за карти с рецепти */
+.recipe-card {
+    transition: transform 0.2s;
+    height: 100%;
+}
+
+.recipe-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.recipe-card img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.recipe-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Стилове за Select2 */
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    min-height: 38px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}

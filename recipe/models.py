@@ -1,14 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from ingredients.models import Ingredient
 
 # Create your models here.
 
 class Recipe(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recipe")
     title = models.CharField(max_length=150)
-    ingredients = models.JSONField(default=list, blank=True)
+    ingredients = models.ManyToManyField(Ingredient, through='IngredientsDetails', related_name='recipe_ingredient')
     description = models.TextField()
     cooking_time = models.PositiveIntegerField(validators=[MinValueValidator(1)], null=True, blank=True)
     calories = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(2000)], null=True, blank=True)
@@ -41,6 +41,18 @@ class Recipe(models.Model):
         
         self.save()
             
+class IngredientsDetails(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    quantity = models.PositiveBigIntegerField()
+    amount = models.CharField(max_length=10) #mg, ml , etc
+
+    class Meta:
+        unique_together = ['recipe', 'ingredient']
+
+    def __str__(self):
+        return f"{self.ingredient.name} - {self.quantity} {self.amount}"
+
 
 class Rating(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="rating")

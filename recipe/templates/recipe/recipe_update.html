@@ -18,8 +18,37 @@
         </div>
         
         <div class="mb-3">
-            <label for="ingredients" class="form-label">Ingredients</label>
-            <textarea class="form-control" id="ingredients" name="ingredients" rows="3" required>{{ recipe.ingredients }}</textarea>
+            <label class="form-label">Ingredients</label>
+            <div id="ingredients-container">
+                {% for detail in recipe.recipedetails_set.all %}
+                    <div class="ingredient-row mb-2">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select name="ingredients" class="form-control" required>
+                                    {% for ingredient in ingredients %}
+                                        <option value="{{ ingredient.id }}" 
+                                            {% if ingredient.id == detail.ingredient.id %}selected{% endif %}>
+                                            {{ ingredient.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" name="quantities" class="form-control" 
+                                       value="{{ detail.quantity }}" placeholder="Quantity" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="amounts" class="form-control" 
+                                       value="{{ detail.amount }}" placeholder="Unit (g, ml, etc)" required>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-secondary mt-2" id="add-ingredient">Add Ingredient</button>
         </div>
         
         <div class="mb-3">
@@ -45,4 +74,54 @@
         <a href="{% url 'recipe_details' recipe_id=recipe.id %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('ingredients-container');
+    const addButton = document.getElementById('add-ingredient');
+    
+    // Template for new ingredient row
+    function getIngredientRowTemplate() {
+        return `
+            <div class="ingredient-row mb-2">
+                <div class="row">
+                    <div class="col-md-4">
+                        <select name="ingredients" class="form-control" required>
+                            {% for ingredient in ingredients %}
+                                <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" name="quantities" class="form-control" 
+                               placeholder="Quantity" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="amounts" class="form-control" 
+                               placeholder="Unit (g, ml, etc)" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Add new ingredient row
+    addButton.addEventListener('click', function() {
+        container.insertAdjacentHTML('beforeend', getIngredientRowTemplate());
+    });
+    
+    // Remove ingredient row
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-ingredient')) {
+            e.target.closest('.ingredient-row').remove();
+        }
+    });
+});
+</script>
+{% endblock %}
+
 {% endblock %}

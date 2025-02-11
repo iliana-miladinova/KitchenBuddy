@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main_app.urls')),
     path('accounts/', include('Users.urls')),
-    path('recipes/', include('recipe.urls'))
+    path('recipes/', include('recipe.urls')),
+    path('ingredients/', include('ingredients.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
