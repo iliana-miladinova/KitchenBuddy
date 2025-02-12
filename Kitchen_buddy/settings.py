@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'Users',
     'recipe',
     'ingredients',
-    'foodPreference'
+    'foodPreference',
+    'substitutionIngredients'
 ]
 
 MIDDLEWARE = [
@@ -145,3 +146,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+RAPID_API_KEY = '61e88a2cf1msh3dad4bc8ad9964dp169137jsn26284c1a364a'

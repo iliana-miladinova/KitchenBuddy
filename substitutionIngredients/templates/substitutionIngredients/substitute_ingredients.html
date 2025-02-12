@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Substitute ingredients for {{ ingredient.name }}</h2>
+    
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+    
+    {% if substitute_ingredients %}
+        <div class="row">
+            {% for substitute in substitute_ingredients %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ substitute.name }}</h5>
+                            <p class="card-text">
+                                Category: {{ substitute.category }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% if not error %}
+            <div class="alert alert-info">
+                No substitutes found for this ingredient.
+            </div>
+        {% endif %}
+    {% endif %}
+    
+    <a href="{% url 'recipe_details' recipe_id %}" class="btn btn-primary">
+        Back to Recipe
+    </a>
+</div>
+{% endblock %}

@@ -110,11 +110,14 @@
             <div class="recipe-ingredients">
                 <h3>Ingredients</h3>
                 <ul class="ingredients-list">
-                    {% for ingredient_detail in ingredients %}
-                        <li class="ingredient-item">
-                            {{ ingredient_detail.quantity }} {{ ingredient_detail.amount }} 
-                            {{ ingredient_detail.ingredient.name }}
-                        </li>
+                    {% for ingredient in ingredients %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ ingredient.quantity }} {{ ingredient.amount }} {{ ingredient.ingredient.name }}</span>
+                        <a href="{% url 'show_substitutes' ingredient.ingredient.id recipe.id %}" 
+                            class="btn btn-outline-info btn-sm">
+                            Find Substitute ingredients
+                        </a>
+                    </li>
                     {% empty %}
                         <li>No ingredients listed</li>
                     {% endfor %}

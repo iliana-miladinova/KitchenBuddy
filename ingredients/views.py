@@ -2,6 +2,8 @@ from django.shortcuts import render
 from recipe.models import Recipe
 from .models import Ingredient
 from foodPreference.models import Diet, Allergy
+from django.http import JsonResponse
+from django.conf import settings
 
 def get_recipes_by_ingredients(request):
     ingredients = Ingredient.objects.all().order_by('category', 'name')
@@ -34,3 +36,4 @@ def get_recipes_by_ingredients(request):
                'allergies': allergies}
 
     return render(request, 'ingredients/get_recipes_by_ingredients.html', context)
+
