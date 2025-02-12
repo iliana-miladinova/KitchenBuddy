@@ -90,6 +90,27 @@ def recipe_create(request):
         # }
         
         return redirect('list_recipe')
+    
+@login_required
+def add_remove_favourite(request, recipe_id):
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+
+    if request.user not in recipe.favourite.all():
+        recipe.favourite.add(request.user)
+    else:
+        recipe.favourite.remove(request.user)
+    
+    return redirect('recipe_details', recipe_id=recipe_id)
+
+@login_required
+def favourite_recipes(request):
+    favourite_recipes = Recipe.objects.filter(favourite=request.user)
+
+    context = {
+        'favourite_recipes': favourite_recipes
+    }
+
+    return render(request, 'recipe/favourite_recipes.html', context)
 
 @login_required
 def recipe_details(request, recipe_id):
@@ -97,11 +118,14 @@ def recipe_details(request, recipe_id):
     #ingredients = recipe.ingredients.all()
     ingredients = IngredientsDetails.objects.filter(recipe=recipe)
     comments = recipe.comment.all()
+    is_favourite_recipe = recipe.favourite.filter(id=request.user.id).exists()
+
 
     context = {
         'recipe': recipe,
         'ingredients': ingredients,
-        'comments': comments
+        'comments': comments,
+        'is_favourite_recipe': is_favourite_recipe
     }
 
     return render(request, 'recipe/recipe_details.html', context)

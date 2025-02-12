@@ -23,6 +23,16 @@
                 </div>
             {% endif %}
             
+            {% if user.is_authenticated %}
+                <a href="{% url 'add_remove_favourite' recipe.id %}" class="btn {% if is_favorite_recipe %}btn-danger{% else %}btn-outline-danger{% endif %} favorite-btn">
+                    <i class="fas fa-heart"></i>
+                    {% if is_favorite_recipe %}
+                        Remove from Favorites
+                    {% else %}
+                        Add to Favorites
+                    {% endif %}
+                </a>
+            {% endif %}
             <div class="recipe-stats">
                 <div class="stat-item">
                     <i class="fas fa-star"></i>

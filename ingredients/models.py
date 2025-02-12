@@ -13,3 +13,14 @@ class Ingredient(models.Model):
     
     class Meta:
         ordering = ['category', 'name']
+
+# class Substitute(models.Model):
+#     ingredient=models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name='ingredient')
+#     substitute_ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, related_name='substitude_ingrdient')
+
+#     def __str__(self):
+#         return f"{self.ingredient.name} can be replaced with {self.substitute_ingredient.name}"
+    
+#     class Meta:
+#         ordering = ['ingredient__name', 'substitute_ingredient__name']
+    

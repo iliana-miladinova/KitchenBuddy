@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>My Favorite Recipes</h2>
+    
+    {% if favourite_recipes %}
+        <div class="row">
+            {% for recipe in favourite_recipes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        {% if recipe.image %}
+                            <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.title }}</h5>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    Rating: {{ recipe.average_rating|floatformat:1 }}
+                                </small>
+                            </p>
+                            <div class="btn-group">
+                                <a href="{% url 'recipe_details' recipe.id %}" class="btn btn-primary">View Recipe</a>
+                                <a href="{% url 'add_remove_favourite' recipe.id %}" class="btn btn-danger">Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            You haven't added any recipes to favorites yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
