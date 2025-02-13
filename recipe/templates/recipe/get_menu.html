@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2 class="text-center">Your Daily Menu</h2>
+            <div class="d-flex justify-content-between align-items-center">
+                <p class="mb-0">Recommended daily calories: <strong>{{ recommended_calories }}</strong></p>
+                <p class="mb-0">Total menu calories: <strong>{{ total_calories_menu }}</strong></p>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Breakfast Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Breakfast</h3>
+                </div>
+                <div class="card-body">
+                    {% if menu.breakfast %}
+                        <div class="d-flex align-items-center">
+                            {% if menu.breakfast.image %}
+                                <img src="{{ menu.breakfast.image.url }}" alt="{{ menu.breakfast.title }}" class="img-fluid rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                            {% endif %}
+                            <div class="ms-3">
+                                <h4>{{ menu.breakfast.title }}</h4>
+                                <p class="mb-0">Calories: {{ menu.breakfast.calories }}</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">No breakfast recipe found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lunch Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">Lunch</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Starter -->
+                    <div class="mb-4">
+                        <h4 class="text-success">Starter</h4>
+                        {% if menu.lunch.starter %}
+                            <div class="d-flex align-items-center">
+                                {% if menu.lunch.starter.image %}
+                                    <img src="{{ menu.lunch.starter.image.url }}" alt="{{ menu.lunch.starter.title }}" class="img-fluid rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <div class="ms-3">
+                                    <h5>{{ menu.lunch.starter.title }}</h5>
+                                    <p class="mb-0">Calories: {{ menu.lunch.starter.calories }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No starter found</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Main Course -->
+                    <div class="mb-4">
+                        <h4 class="text-success">Main Course</h4>
+                        {% if menu.lunch.main %}
+                            <div class="d-flex align-items-center">
+                                {% if menu.lunch.main.image %}
+                                    <img src="{{ menu.lunch.main.image.url }}" alt="{{ menu.lunch.main.title }}" class="img-fluid rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <div class="ms-3">
+                                    <h5>{{ menu.lunch.main.title }}</h5>
+                                    <p class="mb-0">Calories: {{ menu.lunch.main.calories }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No main course found</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Dessert -->
+                    <div>
+                        <h4 class="text-success">Dessert</h4>
+                        {% if menu.lunch.dessert %}
+                            <div class="d-flex align-items-center">
+                                {% if menu.lunch.dessert.image %}
+                                    <img src="{{ menu.lunch.dessert.image.url }}" alt="{{ menu.lunch.dessert.title }}" class="img-fluid rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <div class="ms-3">
+                                    <h5>{{ menu.lunch.dessert.title }}</h5>
+                                    <p class="mb-0">Calories: {{ menu.lunch.dessert.calories }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No dessert found</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dinner Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0">Dinner</h3>
+                </div>
+                <div class="card-body">
+                    <!-- Starter -->
+                    <div class="mb-4">
+                        <h4 class="text-info">Starter</h4>
+                        {% if menu.dinner.starter %}
+                            <div class="d-flex align-items-center">
+                                {% if menu.dinner.starter.image %}
+                                    <img src="{{ menu.dinner.starter.image.url }}" alt="{{ menu.dinner.starter.title }}" class="img-fluid rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <div class="ms-3">
+                                    <h5>{{ menu.dinner.starter.title }}</h5>
+                                    <p class="mb-0">Calories: {{ menu.dinner.starter.calories }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No starter found</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Main Course -->
+                    <div class="mb-4">
+                        <h4 class="text-info">Main Course</h4>
+                        {% if menu.dinner.main %}
+                            <div class="d-flex align-items-center">
+                                {% if menu.dinner.main.image %}
+                                    <img src="{{ menu.dinner.main.image.url }}" alt="{{ menu.dinner.main.title }}" class="img-fluid rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <div class="ms-3">
+                                    <h5>{{ menu.dinner.main.title }}</h5>
+                                    <p class="mb-0">Calories: {{ menu.dinner.main.calories }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No main course found</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Dessert -->
+                    <div>
+                        <h4 class="text-info">Dessert</h4>
+                        {% if menu.dinner.dessert %}
+                            <div class="d-flex align-items-center">
+                                {% if menu.dinner.dessert.image %}
+                                    <img src="{{ menu.dinner.dessert.image.url }}" alt="{{ menu.dinner.dessert.title }}" class="img-fluid rounded" style="width: 150px; height: 150px; object-fit: cover;">
+                                {% endif %}
+                                <div class="ms-3">
+                                    <h5>{{ menu.dinner.dessert.title }}</h5>
+                                    <p class="mb-0">Calories: {{ menu.dinner.dessert.calories }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">No dessert found</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

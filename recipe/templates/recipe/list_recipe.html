@@ -6,14 +6,9 @@
 
 <div class="recipe-header">
     <h1 class="recipe-title">My Recipes</h1>
-    <button
-        type="button"
-        class="btn btn-primary create-recipe-btn"
-        data-bs-toggle="modal"
-        data-bs-target="#createRecipeModal"
-    >
+    <a href="{% url 'recipe_create' %}" class="btn btn-primary create-recipe-btn">
         <i class="fas fa-plus"></i> Create Recipe
-    </button>
+    </a>
 </div>
 
 <div class="recipe-sections">

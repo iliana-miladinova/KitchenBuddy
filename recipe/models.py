@@ -5,6 +5,9 @@ from ingredients.models import Ingredient
 from foodPreference.models import Allergy, Diet
 
 # Create your models here.
+DISH_TYPE = [('breakfast', 'breakfast'), ('starter', 'starter'),
+             ('main', 'main'), ('dessert', 'dessert')]
+
 
 class Recipe(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recipe")
@@ -14,8 +17,10 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(validators=[MinValueValidator(1)], null=True, blank=True)
     calories = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(2000)], null=True, blank=True)
     image = models.ImageField(upload_to='recipes/', null=True, blank=True)
+    dish_type = models.CharField(max_length=10, choices=DISH_TYPE, default='main')
 
     favourite = models.ManyToManyField(User, related_name='favourite_recipe', blank=True)
+
 
     average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
     ratings_count = models.PositiveBigIntegerField(default=0)

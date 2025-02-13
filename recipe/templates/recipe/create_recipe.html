@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Create New Recipe</h1>
+    
+    <form method="POST" action="{% url 'recipe_create' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-group mb-3">
+            <label for="title">Recipe Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Ingredients</label>
+            <div id="ingredients-container">
+                <div class="ingredient-row mb-3">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <select class="form-control ingredient-select" name="ingredient[]" required>
+                                <option value="">Select ingredient</option>
+                                {% regroup ingredients by get_category_display as ingredient_list %}
+                                {% for category in ingredient_list %}
+                                    <optgroup label="{{ category.grouper }}">
+                                        {% for ingredient in category.list %}
+                                            <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="amount[]" placeholder="Unit (g, ml, etc)" required>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-danger remove-ingredient">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" id="add-ingredient">+ Add Ingredient</button>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Dietary Preferences</label>
+            <div id="preferences-container">
+                <div class="preference-row mb-3">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <select class="form-control preference-select" name="diet[]" required>
+                                <option value="">Select dietary preference</option>
+                                {% for diet in diets %}
+                                    <option value="{{ diet.id }}">{{ diet.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-danger remove-preference">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" id="add-preference">+ Add Dietary Preference</button>
+        </div>
+
+        <div class="form-group mb-3">
+            <label>Allergens</label>
+            <div id="allergens-container">
+                <div class="allergen-row mb-3">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <select class="form-control allergen-select" name="allergy[]" required>
+                                <option value="">Select allergen</option>
+                                {% for allergy in allergies %}
+                                    <option value="{{ allergy.id }}">{{ allergy.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-danger remove-allergen">×</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" class="btn btn-secondary" id="add-allergen">+ Add Allergen</button>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="cooking_time">Cooking Time (minutes)</label>
+            <input type="number" class="form-control" id="cooking_time" name="cooking_time" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="calories">Calories</label>
+            <input type="number" class="form-control" id="calories" name="calories" required>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="dish_type">Dish Type</label>
+            <select class="form-control" id="dish_type" name="dish_type" required>
+                <option value="">Select dish type</option>
+                <option value="breakfast">Breakfast</option>
+                <option value="starter">Starter</option>
+                <option value="main">Main</option>
+                <option value="dessert">Dessert</option>
+            </select>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="image">Recipe Image</label>
+            <input type="file" class="form-control" id="image" name="image">
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Create Recipe</button>
+            <a href="{% url 'list_recipe' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Копираме JavaScript от модалния прозорец
+    document.addEventListener('DOMContentLoaded', function() {
+        const ingredientsContainer = document.getElementById('ingredients-container');
+        const addIngredientButton = document.getElementById('add-ingredient');
+        const preferencesContainer = document.getElementById('preferences-container');
+        const addPreferenceButton = document.getElementById('add-preference');
+        const allergensContainer = document.getElementById('allergens-container');
+        const addAllergenButton = document.getElementById('add-allergen');
+
+        function addNewRow(container, rowSelector, removeButtonSelector) {
+            const newRow = container.children[0].cloneNode(true);
+            newRow.querySelectorAll('input, select').forEach(input => input.value = '');
+            
+            newRow.querySelector(removeButtonSelector).addEventListener('click', function() {
+                if (container.children.length > 1) {
+                    this.closest(rowSelector).remove();
+                }
+            });
+    
+            container.appendChild(newRow);
+        }
+
+        function initializeRemoveButtons(container, rowSelector, removeButtonSelector) {
+            container.querySelector(removeButtonSelector).addEventListener('click', function() {
+                if (container.children.length > 1) {
+                    this.closest(rowSelector).remove();
+                }
+            });
+        }
+
+        addIngredientButton.addEventListener('click', function() {
+            addNewRow(ingredientsContainer, '.ingredient-row', '.remove-ingredient');
+        });
+        initializeRemoveButtons(ingredientsContainer, '.ingredient-row', '.remove-ingredient');
+
+        addPreferenceButton.addEventListener('click', function() {
+            addNewRow(preferencesContainer, '.preference-row', '.remove-preference');
+        });
+        initializeRemoveButtons(preferencesContainer, '.preference-row', '.remove-preference');
+
+        addAllergenButton.addEventListener('click', function() {
+            addNewRow(allergensContainer, '.allergen-row', '.remove-allergen');
+        });
+        initializeRemoveButtons(allergensContainer, '.allergen-row', '.remove-allergen');
+    });
+</script>
+{% endblock %}

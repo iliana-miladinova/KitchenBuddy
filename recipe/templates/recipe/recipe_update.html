@@ -11,6 +11,17 @@
             <label for="title" class="form-label">Recipe Title</label>
             <input type="text" class="form-control" id="title" name="title" value="{{ recipe.title }}" required>
         </div>
+
+        <div class="form-group">
+            <label for="meal_type">Meal Type:</label>
+            <select class="form-control" id="meal_type" name="meal_type" required>
+                <option value="">Select meal type</option>
+                <option value="breakfast" {% if recipe.meal_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
+                <option value="appetizer" {% if recipe.meal_type == 'appetizer' %}selected{% endif %}>Appetizer</option>
+                <option value="main" {% if recipe.meal_type == 'main' %}selected{% endif %}>Main Course</option>
+                <option value="dessert" {% if recipe.meal_type == 'dessert' %}selected{% endif %}>Dessert</option>
+            </select>
+        </div>
         
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>

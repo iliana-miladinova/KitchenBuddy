@@ -7,6 +7,8 @@ from django.db import models
 from .models import Recipe, Rating, Comment, IngredientsDetails
 from ingredients.models import Ingredient
 from foodPreference.models import Allergy, Diet
+from Users.models import Profile
+from random import shuffle
 
 # Create your views here.
 @login_required
@@ -58,10 +60,11 @@ def recipe_create(request):
         #ingredients = request.POST['ingredients']
         cooking_time = request.POST['cooking_time']
         calories = request.POST['calories']
+        dish_type = request.POST['dish_type']
         image = request.FILES['image']
 
         recipe = Recipe.objects.create(user=request.user, title=title, description=description,
-                                       cooking_time=cooking_time, calories=calories,
+                                       cooking_time=cooking_time, calories=calories, dish_type=dish_type,
                                        image=image)
         
         diets = request.POST.getlist('diet[]')
@@ -90,6 +93,17 @@ def recipe_create(request):
         # }
         
         return redirect('list_recipe')
+    else:
+        ingredients = Ingredient.objects.all().order_by('category', 'name')
+        diets = Diet.objects.all().order_by('name')
+        allergies = Allergy.objects.all().order_by('name')
+        context = {
+            'ingredients': ingredients,
+            'diets': diets,
+            'allergies': allergies
+        }
+        return render(request, 'recipe/create_recipe.html', context)
+
     
 @login_required
 def add_remove_favourite(request, recipe_id):
@@ -140,6 +154,7 @@ def recipe_update(request, recipe_id):
             #ingredients = request.POST['ingredients']
             cooking_time = request.POST['cooking_time']
             calories = request.POST['calories']
+            dish_type = request.POST['dish_type']
         
         
             recipe.title = title
@@ -147,6 +162,7 @@ def recipe_update(request, recipe_id):
             #recipe.ingredients = ingredients
             recipe.cooking_time = cooking_time
             recipe.calories = calories
+            recipe.dish_type = dish_type
         
             
             if 'image' in request.FILES:
@@ -201,3 +217,111 @@ def add_comment(request, recipe_id):
     
     #??????
     return redirect('recipe_details', recipe_id=recipe_id)
+
+@login_required
+def get_menu(request):
+    try:
+        user_profile = request.user.profile
+        calories_per_day = user_profile.calories
+    except Profile.DoesNotExist:
+        calories_per_day = 2000
+    
+    calories_breakfast = calories_per_day * 0.25
+    calories_lunch = calories_per_day * 0.4
+    calories_dinner = calories_per_day * 0.35
+
+    favourite_recipes = Recipe.objects.filter(favourite=request.user)
+
+    menu = {
+        'breakfast': None,
+        'lunch': {
+            'starter': None,
+            'main': None,
+            'dessert': None
+        },
+        'dinner': {
+            'starter': None,
+            'main': None,
+            'dessert': None
+        }
+    }
+    
+    breakfast_recipes = favourite_recipes.filter(dish_type='breakfast')
+    shuffle(breakfast_recipes)
+    for recipe in breakfast_recipes:
+        if recipe.calories <= calories_breakfast:
+            menu['breakfast'] = recipe
+            break
+
+    #calories_lunch_remaining = calories_lunch
+    starter_calories_lunch = calories_per_day * 0.1
+    main_calories_lunch = calories_per_day * 0.25
+    dessert_calories_lunch = calories_per_day * 0.05
+
+    starter_recipes = favourite_recipes.filter(dish_type='starter')
+    shuffle(starter_recipes)
+    for recipe in starter_recipes:
+        #starter_calories = calories_lunch_remaining * 0.1
+        if recipe.calories <= starter_calories_lunch:
+            menu['lunch']['starter'] = recipe
+            #calories_lunch_remaining -= recipe.calories
+            break
+
+    main_recipes = favourite_recipes.filter(dish_type='main')
+    shuffle(main_recipes)
+    for recipe in main_recipes:
+        if recipe.calories <= main_calories_lunch:
+            menu['lunch']['main'] = recipe
+            break
+
+    dessert_recipes = favourite_recipes.filter(dish_type='dessert')
+    shuffle(dessert_recipes)
+    for recipe in dessert_recipes:
+        if recipe.calories <= dessert_calories_lunch:
+            menu['lunch']['dessert'] = recipe
+            break
+
+    starter_calories_dinner = calories_per_day * 0.1
+    main_calories_dinner = calories_per_day * 0.20
+    dessert_calories_dinner = calories_per_day * 0.05
+
+    starter_recipes = favourite_recipes.filter(dish_type='starter')
+    shuffle(starter_recipes)
+    for recipe in starter_recipes:
+        #starter_calories = calories_lunch_remaining * 0.1
+        if recipe.calories <= starter_calories_dinner:
+            menu['dinner']['starter'] = recipe
+            #calories_lunch_remaining -= recipe.calories
+            break
+
+    main_recipes = favourite_recipes.filter(dish_type='main')
+    shuffle(main_recipes)
+    for recipe in main_recipes:
+        if recipe.calories <= main_calories_dinner:
+            menu['dinner']['main'] = recipe
+            break
+
+    dessert_recipes = favourite_recipes.filter(dish_type='dessert')
+    shuffle(dessert_recipes)
+    for recipe in dessert_recipes:
+        if recipe.calories <= dessert_calories_dinner:
+            menu['dinner']['dessert'] = recipe
+            break
+
+    total_calories_menu = 0
+    if menu['breakfast']:
+        total_calories_menu += menu['breakfast'].calories
+
+    for course in ['starter', 'main', 'dessert']:
+        if menu['lunch'][course]:
+            total_calories_menu += menu['lunch'][course].calories
+        if menu['dinner'][course]:
+            total_calories_menu += menu['dinner'][course].calories
+
+    context = {
+        'menu': menu,
+        'total_calories_menu': total_calories_menu,
+        'recommended_calories': calories_per_day
+    }
+
+    return render(request, 'recipe/get_menu.html', context)
