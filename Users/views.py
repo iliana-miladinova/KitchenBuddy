@@ -4,6 +4,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from .models import Profile
+from django.conf import settings
+import requests
 
 
 def register_view(request):
@@ -59,4 +62,52 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+@login_required
+def profile(request):
+    try:
+        user_profile = request.user.profile
+    except Profile.DoesNotExist:
+        user_profile = Profile(user=request.user)
     
+    if request.method == 'POST':
+        user_profile.age = request.POST['age']
+        user_profile.gender = request.POST['gender']
+        user_profile.weight = request.POST['weight']
+        user_profile.height = request.POST['height']
+        user_profile.activity = request.POST['activity']
+
+        if (not user_profile.age or not user_profile.gender or not user_profile.weight or not 
+            user_profile.height or not user_profile.activity):
+            messages.error(request, 'Some fields are not filled')
+            context = {'user_profile': user_profile}
+            return render(request, 'Users/profile.html', context)
+        
+        
+        user_profile.age = int(user_profile.age)
+        user_profile.weight = float(user_profile.weight)
+        user_profile.height = float(user_profile.height)
+
+        #Mifflin-St Jeor Equation
+        if user_profile.gender == 'Male':
+            bmr = 10 * user_profile.weight + 6.25 * user_profile.height - 5 * user_profile.age + 5
+        else:
+            bmr = 10 * user_profile.weight + 6.25 * user_profile.height - 5 * user_profile.age - 161
+            
+        ACTIVITY_FACTOR = {
+            'sedentary': 1.2,
+            'light': 1.375,
+            'moderate': 1.55,
+            'very': 1.725
+        }
+
+        multiplier = ACTIVITY_FACTOR.get(user_profile.activity, 1.2)
+        user_profile.calories = round(bmr * multiplier)
+        user_profile.save()
+
+    
+    context = {
+        'user_profile': user_profile
+    }
+    return render(request, 'Users/profile.html', context)
+
+

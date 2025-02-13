@@ -134,21 +134,21 @@ def recipe_update(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     if request.user == recipe.user:
         if request.method == 'POST':
-        # Get form data
+        
             title = request.POST['title']
             description = request.POST['description']
             #ingredients = request.POST['ingredients']
             cooking_time = request.POST['cooking_time']
             calories = request.POST['calories']
         
-        # Update recipe fields
+        
             recipe.title = title
             recipe.description = description
             #recipe.ingredients = ingredients
             recipe.cooking_time = cooking_time
             recipe.calories = calories
         
-            # Handle image update if provided
+            
             if 'image' in request.FILES:
                 recipe.image = request.FILES['image']
 

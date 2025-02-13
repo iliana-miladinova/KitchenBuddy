@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Calculate Your Daily Calories</h2>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Форма в лявата колона -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Enter Your Details</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group mb-3">
+                            <label for="age">Age:</label>
+                            <input type="number" class="form-control" id="age" name="age" 
+                                   value="{{ user_profile.age|default:'' }}" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="weight">Weight (kg):</label>
+                            <input type="number" step="0.1" class="form-control" id="weight" name="weight" 
+                                   value="{{ user_profile.weight|default:'' }}" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="height">Height (cm):</label>
+                            <input type="number" step="0.1" class="form-control" id="height" name="height" 
+                                   value="{{ user_profile.height|default:'' }}" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="gender">Gender:</label>
+                            <select class="form-control" id="gender" name="gender" required>
+                                <option value="">Select gender</option>
+                                <option value="Male" {% if user_profile.gender == 'Male' %}selected{% endif %}>Male</option>
+                                <option value="Female" {% if user_profile.gender == 'Female' %}selected{% endif %}>Female</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="activity">Activity Level:</label>
+                            <select class="form-control" id="activity" name="activity" required>
+                                <option value="">Select activity level</option>
+                                <option value="sedentary" {% if user_profile.activity == 'sedentary' %}selected{% endif %}>
+                                    Sedentary (little or no exercise)
+                                </option>
+                                <option value="light" {% if user_profile.activity == 'light' %}selected{% endif %}>
+                                    Lightly active (1-3 days/week)
+                                </option>
+                                <option value="moderate" {% if user_profile.activity == 'moderate' %}selected{% endif %}>
+                                    Moderately active (3-5 days/week)
+                                </option>
+                                <option value="very" {% if user_profile.activity == 'very' %}selected{% endif %}>
+                                    Very active (6-7 days/week)
+                                </option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Calculate Daily Calories</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Резултати в дясната колона -->
+        <div class="col-md-6">
+            {% if user_profile.age or user_profile.calories %}
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Your Profile Summary</h3>
+                    
+                    {% if user_profile.age %}
+                    <div class="mb-3">
+                        <h5>Personal Details:</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Age:</strong> {{ user_profile.age }} years</li>
+                            <li><strong>Weight:</strong> {{ user_profile.weight }} kg</li>
+                            <li><strong>Height:</strong> {{ user_profile.height }} cm</li>
+                            <li><strong>Gender:</strong> {{ user_profile.gender }}</li>
+                            <li><strong>Activity Level:</strong> {{ user_profile.activity }}</li>
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if user_profile.calories %}
+                    <div class="mt-4">
+                        <h5>Recommended Daily Calories:</h5>
+                        <p class="display-4 text-primary">{{ user_profile.calories }}</p>
+                        <p class="text-muted">calories per day</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
