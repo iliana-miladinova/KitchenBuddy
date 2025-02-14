@@ -61,18 +61,19 @@
                 </div>
                 {% endif %}
 
-                <div class="recipe-info">
-                    <p><strong>Meal Type:</strong> 
-                        {% if recipe.dish_type == 'breakfast' %}
-                            Breakfast
-                        {% elif recipe.dish_type == 'starter' %}
-                            Appetizer
-                        {% elif recipe.dish_type == 'main' %}
-                            Main Course
-                        {% elif recipe.dish_type == 'dessert' %}
-                            Dessert
-                        {% endif %}
-                    </p>
+                <div class="stat-item">
+                    <i class="fas fa-utensils"></i>
+                    <span>Dish Type: 
+                    {% if recipe.dish_type == 'breakfast' %}
+                        Breakfast
+                    {% elif recipe.dish_type == 'starter' %}
+                        Starter
+                    {% elif recipe.dish_type == 'main' %}
+                        Main Course
+                    {% elif recipe.dish_type == 'dessert' %}
+                        Dessert
+                    {% endif %}
+                    </span>
                 </div>
 
                 <div class="stat-item">

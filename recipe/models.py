@@ -17,7 +17,7 @@ class Recipe(models.Model):
     cooking_time = models.PositiveIntegerField(validators=[MinValueValidator(1)], null=True, blank=True)
     calories = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(2000)], null=True, blank=True)
     image = models.ImageField(upload_to='recipes/', null=True, blank=True)
-    dish_type = models.CharField(max_length=10, choices=DISH_TYPE, default='main')
+    dish_type = models.CharField(max_length=10, choices=DISH_TYPE, default='main', null=False)
 
     favourite = models.ManyToManyField(User, related_name='favourite_recipe', blank=True)
 

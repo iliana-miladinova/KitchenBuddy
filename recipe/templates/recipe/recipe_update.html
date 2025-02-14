@@ -13,13 +13,13 @@
         </div>
 
         <div class="form-group">
-            <label for="meal_type">Meal Type:</label>
-            <select class="form-control" id="meal_type" name="meal_type" required>
-                <option value="">Select meal type</option>
-                <option value="breakfast" {% if recipe.meal_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
-                <option value="appetizer" {% if recipe.meal_type == 'appetizer' %}selected{% endif %}>Appetizer</option>
-                <option value="main" {% if recipe.meal_type == 'main' %}selected{% endif %}>Main Course</option>
-                <option value="dessert" {% if recipe.meal_type == 'dessert' %}selected{% endif %}>Dessert</option>
+            <label for="dish_type">Dish Type:</label>
+            <select class="form-control" id="dish_type" name="dish_type" required>
+                <option value="main" {% if not recipe.dish_type %}selected{% endif %}>Main Course</option>
+                <option value="breakfast" {% if recipe.dish_type == 'breakfast' %}selected{% endif %}>Breakfast</option>
+                <option value="starter" {% if recipe.dish_type == 'starter' %}selected{% endif %}>Starter</option>
+                <option value="main" {% if recipe.dish_type == 'main' %}selected{% endif %}>Main Course</option>
+                <option value="dessert" {% if recipe.dish_type == 'dessert' %}selected{% endif %}>Dessert</option>
             </select>
         </div>
         
@@ -31,32 +31,32 @@
         <div class="mb-3">
             <label class="form-label">Ingredients</label>
             <div id="ingredients-container">
-                {% for detail in recipe.recipedetails_set.all %}
-                    <div class="ingredient-row mb-2">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <select name="ingredients" class="form-control" required>
-                                    {% for ingredient in ingredients %}
-                                        <option value="{{ ingredient.id }}" 
-                                            {% if ingredient.id == detail.ingredient.id %}selected{% endif %}>
-                                            {{ ingredient.name }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <input type="number" name="quantities" class="form-control" 
-                                       value="{{ detail.quantity }}" placeholder="Quantity" required>
-                            </div>
-                            <div class="col-md-3">
-                                <input type="text" name="amounts" class="form-control" 
-                                       value="{{ detail.amount }}" placeholder="Unit (g, ml, etc)" required>
-                            </div>
-                            <div class="col-md-2">
-                                <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
-                            </div>
+                {% for detail in recipe.ingredientsdetails_set.all %}
+                <div class="ingredient-row mb-2">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <select name="ingredient[]" class="form-control" required>
+                                {% for ing in ingredient %}
+                                    <option value="{{ ing.id }}" 
+                                        {% if ing.id == detail.ingredient.id %}selected{% endif %}>
+                                        {{ ing.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" name="quantity[]" class="form-control" 
+                                   value="{{ detail.quantity }}" placeholder="Quantity" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="amount[]" class="form-control" 
+                                   value="{{ detail.amount }}" placeholder="Unit (g, ml, etc)" required>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
                         </div>
                     </div>
+                </div>
                 {% endfor %}
             </div>
             <button type="button" class="btn btn-secondary mt-2" id="add-ingredient">Add Ingredient</button>
@@ -71,7 +71,31 @@
             <label for="calories" class="form-label">Calories</label>
             <input type="number" class="form-control" id="calories" name="calories" value="{{ recipe.calories }}" min="0" required>
         </div>
+
+        <div class="mb-3">
+            <label class="form-label">Diets</label>
+            <select class="form-control" name="diet_name" multiple>
+                {% for diet in diets %}
+                    <option value="{{ diet.id }}" 
+                        {% if diet in recipe.diet.all %}selected{% endif %}>
+                        {{ diet.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
         
+        <div class="mb-3">
+            <label class="form-label">Allergies</label>
+            <select class="form-control" name="allergy[]" multiple>
+                {% for allergy in allergies %}
+                    <option value="{{ allergy.id }}" 
+                        {% if allergy in recipe.allergies.all %}selected{% endif %}>
+                        {{ allergy.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
         <div class="mb-3">
             <label for="image" class="form-label">Recipe Image</label>
             {% if recipe.image %}
@@ -94,31 +118,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Template for new ingredient row
     function getIngredientRowTemplate() {
-        return `
-            <div class="ingredient-row mb-2">
-                <div class="row">
-                    <div class="col-md-4">
-                        <select name="ingredients" class="form-control" required>
-                            {% for ingredient in ingredients %}
-                                <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="number" name="quantities" class="form-control" 
-                               placeholder="Quantity" required>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="amounts" class="form-control" 
-                               placeholder="Unit (g, ml, etc)" required>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
-                    </div>
+    return `
+        <div class="ingredient-row mb-2">
+            <div class="row">
+                <div class="col-md-4">
+                    <select name="ingredient[]" class="form-control" required>  <!-- Промяна тук: добавено [] -->
+                        {% for ing in ingredient %}
+                            <option value="{{ ing.id }}">{{ ing.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="quantity[]" class="form-control"   <!-- Промяна тук: добавено [] -->
+                           placeholder="Quantity" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="amount[]" class="form-control"   <!-- Промяна тук: добавено [] -->
+                           placeholder="Unit (g, ml, etc)" required>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
                 </div>
             </div>
-        `;
-    }
+        </div>
+    `;
+}
     
     // Add new ingredient row
     addButton.addEventListener('click', function() {
