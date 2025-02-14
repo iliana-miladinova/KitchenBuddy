@@ -12,311 +12,97 @@
 </div>
 
 <div class="recipe-sections">
-    <!-- Sorting Section -->
-    <section class="recipe-section">
-        <h2 class="section-title">
-            <i class="fas fa-sort"></i>
-            Sort Recipes
-        </h2>
-        <select class="form-select" onchange="window.location.href='?sort_by=' + this.value">
-            {% for key, value in sorting_options.items %}
-                <option value="{{ key }}" {% if sort_by == key %}selected{% endif %}>
-                    Sort by {{ value }}
-                </option>
-            {% endfor %}
-        </select>
-    </section>
-
-    <section class="recipe-section">
-        <h2 class="section-title">
-            <i class="fas fa-filter"></i>
-            Filter Recipes
-        </h2>
-        <form method="GET" class="filter-form">
-            <div class="row">
-                <div class="col-md-5">
-                    <label>Filter by Diet:</label>
-                    <select class="form-control" name="diets_filter" multiple>
-                        {% for diet in diets %}
-                            <option value="{{ diet.id }}" {% if diet.id|stringformat:"i" in request.GET.diets_filter %}selected{% endif %}>
-                                {{ diet.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <label>Exclude Allergens:</label>
-                    <select class="form-control" name="allergies_filter" multiple>
-                        {% for allergen in allergies %}
-                            <option value="{{ allergen.id }}" {% if allergen.id|stringformat:"i" in request.GET.allergies_filter %}selected{% endif %}>
-                                {{ allergen.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary mt-4">Apply Filters</button>
-                    <a href="{% url 'list_recipe' %}" class="btn btn-secondary mt-4">Clear Filters</a>
-                </div>
-            </div>
-        </form>
-    </section>
-
+    <form method="GET" action="{% url 'list_recipe' %}">
+        <div class="mb-3">
+            <label class="form-label">Sort by:</label>
+            <select name="sort_by" class="form-control">
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Title</option>
+                <option value="cooking_time" {% if sort_by == 'cooking_time' %}selected{% endif %}>Cooking Time</option>
+                <option value="calories" {% if sort_by == 'calories' %}selected{% endif %}>Calories</option>
+                <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Rating</option>
+            </select>
+            
+        </div>
+    
+        <div class="mb-3">
+            <label class="form-label">Filter by Diets:</label>
+            <select name="diets_filter" multiple class="form-control">
+                {% for diet in diets %}
+                    <option value="{{ diet.id }}" 
+                        {% if diet.id|stringformat:"i" in diets_filter %}selected{% endif %}>
+                        {{ diet.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    
+        <div class="mb-3">
+            <label class="form-label">Exclude Allergies:</label>
+            <select name="allergies_filter" multiple class="form-control">
+                {% for allergy in allergies %}
+                    <option value="{{ allergy.id }}"
+                        {% if allergy.id|stringformat:"i" in allergies_filter %}selected{% endif %}>
+                        {{ allergy.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+            <a href="{% url 'list_recipe' %}" class="btn btn-secondary">Clear Filters</a>
+        </div>
+    </form>
     <!-- User's Recipes Section -->
-    <section class="recipe-section">
-        <h2 class="section-title">
-            <i class="fas fa-utensils"></i>
-            Your Recipes
-        </h2>
-        {% if users_recipes %}
-            <div class="recipes-container">
-                {% for recipe in users_recipes %}
-                    <div class="recipe-card">
-                        <div class="recipe-image">
-                            {% if recipe.image %}
-                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
-                            {% endif %}
-                        </div>
-                        <div class="recipe-details">
-                            <h3>{{ recipe.title }}</h3>
-                            <div class="recipe-info">
-                                <p><i class="fas fa-star"></i> Rating: {{ recipe.average_rating|floatformat:1 }}</p>
-                                <p><i class="fas fa-clock"></i> Time: {{ recipe.cooking_time }} mins</p>
-                                <p><i class="fas fa-fire"></i> Calories: {{ recipe.calories }}</p>
-                            </div>
-                            <div class="recipe-actions">
-                                <a href="{% url 'recipe_details' recipe.id %}" class="btn btn-primary">View</a>
-                                <a href="{% url 'recipe_update' recipe.id %}" class="btn btn-secondary">Edit</a>
-                            </div>
+    <div class="mt-4">
+        <h3>Your Recipes</h3>
+        <div class="row">
+            {% for recipe in users_recipes %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        {% if recipe.image %}
+                            <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.title }}</h5>
+                            <p class="card-text">
+                                Cooking Time: {{ recipe.cooking_time }} min<br>
+                                Calories: {{ recipe.calories }}<br>
+                                Rating: {{ recipe.average_rating|default:"No ratings yet" }}
+                            </p>
+                            <a href="{% url 'recipe_details' recipe.id %}" class="btn btn-primary">View Details</a>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="no-recipes-message">You haven't created any recipes yet!</p>
-        {% endif %}
-    </section>
+                </div>
+            {% empty %}
+                <p>No recipes found.</p>
+            {% endfor %}
+        </div>
 
     <!-- All Recipes Section -->
-    <section class="recipe-section">
-        <h2 class="section-title">
-            <i class="fas fa-book-open"></i>
-            All Recipes
-        </h2>
-        {% if all_recipes %}
-            <div class="recipes-container">
-                {% for recipe in all_recipes %}
-                    <div class="recipe-card">
-                        <div class="recipe-image">
-                            {% if recipe.image %}
-                                <img src="{{ recipe.image.url }}" alt="{{ recipe.title }}">
-                            {% endif %}
-                        </div>
-                        <div class="recipe-details">
-                            <h3>{{ recipe.title }}</h3>
-                            <div class="recipe-info">
-                                <p><i class="fas fa-star"></i> Rating: {{ recipe.average_rating|floatformat:1 }}</p>
-                                <p><i class="fas fa-clock"></i> Time: {{ recipe.cooking_time }} mins</p>
-                                <p><i class="fas fa-fire"></i> Calories: {{ recipe.calories }}</p>
-                            </div>
-                            <div class="recipe-actions">
-                                <a href="{% url 'recipe_details' recipe.id %}" class="btn btn-primary">View</a>
-                                {% if request.user == recipe.user %}
-                                    <a href="{% url 'recipe_update' recipe.id %}" class="btn btn-secondary">Edit</a>
-                                {% endif %}
-                            </div>
-                        </div>
+    <h3 class="mt-4">All Recipes</h3>
+    <div class="row">
+        {% for recipe in all_recipes %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    {% if recipe.image %}
+                        <img src="{{ recipe.image.url }}" class="card-img-top" alt="{{ recipe.title }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recipe.title }}</h5>
+                        <p class="card-text">
+                            Cooking Time: {{ recipe.cooking_time }} min<br>
+                            Calories: {{ recipe.calories }}<br>
+                            Rating: {{ recipe.average_rating|default:"No ratings yet" }}
+                        </p>
+                        <a href="{% url 'recipe_details' recipe.id %}" class="btn btn-primary">View Details</a>
                     </div>
-                {% endfor %}
+                </div>
             </div>
-        {% else %}
-            <p class="no-recipes-message">No recipes available!</p>
-        {% endif %}
-    </section>
-</div>
-
-<!-- Create Recipe Modal -->
-<div class="modal fade" id="createRecipeModal" tabindex="-1" aria-labelledby="createRecipeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createRecipeModalLabel">Create New Recipe</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{% url 'recipe_create' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <div class="form-group mb-3">
-                        <label for="title">Recipe Title</label>
-                        <input type="text" class="form-control" id="title" name="title" required>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label>Ingredients</label>
-                        <div id="ingredients-container">
-                            <div class="ingredient-row mb-3">
-                                <div class="row">
-                                    <div class="col-md-5">
-                                        <select class="form-control ingredient-select" name="ingredient[]" required>
-                                            <option value="">Select ingredient</option>
-                                            {% regroup ingredients by get_category_display as ingredient_list %}
-                                            {% for category in ingredient_list %}
-                                                <optgroup label="{{ category.grouper }}">
-                                                    {% for ingredient in category.list %}
-                                                        <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
-                                                    {% endfor %}
-                                                </optgroup>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <input type="text" class="form-control" name="amount[]" placeholder="Unit (g, ml, etc)" required>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <button type="button" class="btn btn-danger remove-ingredient">×</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-secondary" id="add-ingredient">+ Add Ingredient</button>
-                    </div>
-
-                    
-                    <div class="form-group mb-3">
-                        <label>Dietary Preferences</label>
-                        <div id="preferences-container">
-                            <div class="preference-row mb-3">
-                                <div class="row">
-                                    <div class="col-md-5">
-                                        <select class="form-control preference-select" name="diet[]" required>
-                                            <option value="">Select dietary preference</option>
-                                            {% for diet in diets %}
-                                                <option value="{{ diet.id }}">{{ diet.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <button type="button" class="btn btn-danger remove-preference">×</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-secondary" id="add-preference">+ Add Dietary Preference</button>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label>Allergens</label>
-                        <div id="allergens-container">
-                            <div class="allergen-row mb-3">
-                                <div class="row">
-                                    <div class="col-md-5">
-                                        <select class="form-control allergen-select" name="allergy[]" required>
-                                            <option value="">Select allergen</option>
-                                            {% for allergy in allergies %}
-                                                <option value="{{ allergy.id }}">{{ allergy.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="col-md-1">
-                                        <button type="button" class="btn btn-danger remove-allergen">×</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn btn-secondary" id="add-allergen">+ Add Allergen</button>
-                    </div>
-                    
-
-                    <div class="form-group mb-3">
-                        <label for="description">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label for="cooking_time">Cooking Time (minutes)</label>
-                        <input type="number" class="form-control" id="cooking_time" name="cooking_time" required>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label for="calories">Calories</label>
-                        <input type="number" class="form-control" id="calories" name="calories" required>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label for="image">Recipe Image</label>
-                        <input type="file" class="form-control" id="image" name="image">
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Create Recipe</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        {% empty %}
+            <p>No recipes found.</p>
+        {% endfor %}
     </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Existing ingredients code
-        const ingredientsContainer = document.getElementById('ingredients-container');
-        const addIngredientButton = document.getElementById('add-ingredient');
-    
-        // New preferences code
-        const preferencesContainer = document.getElementById('preferences-container');
-        const addPreferenceButton = document.getElementById('add-preference');
-    
-        // New allergens code
-        const allergensContainer = document.getElementById('allergens-container');
-        const addAllergenButton = document.getElementById('add-allergen');
-    
-        // Function to handle adding new rows
-        function addNewRow(container, rowSelector, removeButtonSelector) {
-            const newRow = container.children[0].cloneNode(true);
-            // Clear the values
-            newRow.querySelectorAll('input, select').forEach(input => input.value = '');
-            
-            // Add remove functionality
-            newRow.querySelector(removeButtonSelector).addEventListener('click', function() {
-                if (container.children.length > 1) {
-                    this.closest(rowSelector).remove();
-                }
-            });
-    
-            container.appendChild(newRow);
-        }
-
-        function initializeRemoveButtons(container, rowSelector, removeButtonSelector) {
-        container.querySelector(removeButtonSelector).addEventListener('click', function() {
-            if (container.children.length > 1) {
-                this.closest(rowSelector).remove();
-            }
-        });
-    }
-
-    // Ingredients
-    addIngredientButton.addEventListener('click', function() {
-        addNewRow(ingredientsContainer, '.ingredient-row', '.remove-ingredient');
-    });
-    initializeRemoveButtons(ingredientsContainer, '.ingredient-row', '.remove-ingredient');
-
-    // Preferences
-    addPreferenceButton.addEventListener('click', function() {
-        addNewRow(preferencesContainer, '.preference-row', '.remove-preference');
-    });
-    initializeRemoveButtons(preferencesContainer, '.preference-row', '.remove-preference');
-
-    // Allergens
-    addAllergenButton.addEventListener('click', function() {
-        addNewRow(allergensContainer, '.allergen-row', '.remove-allergen');
-    });
-    initializeRemoveButtons(allergensContainer, '.allergen-row', '.remove-allergen');
-});
-</script>
 
 {% endblock %}

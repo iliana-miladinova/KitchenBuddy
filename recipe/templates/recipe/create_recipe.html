@@ -14,80 +14,85 @@
         </div>
 
         <div class="form-group mb-3">
-            <label>Ingredients</label>
-            <div id="ingredients-container">
-                <div class="ingredient-row mb-3">
-                    <div class="row">
-                        <div class="col-md-5">
-                            <select class="form-control ingredient-select" name="ingredient[]" required>
-                                <option value="">Select ingredient</option>
-                                {% regroup ingredients by get_category_display as ingredient_list %}
-                                {% for category in ingredient_list %}
-                                    <optgroup label="{{ category.grouper }}">
-                                        {% for ingredient in category.list %}
-                                            <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
-                                        {% endfor %}
-                                    </optgroup>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <input type="number" class="form-control" name="quantity[]" placeholder="Quantity" required>
-                        </div>
-                        <div class="col-md-3">
-                            <input type="text" class="form-control" name="amount[]" placeholder="Unit (g, ml, etc)" required>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-danger remove-ingredient">×</button>
-                        </div>
-                    </div>
+            
+            {{ ingredients_form.management_form }}
+            
+            <!-- Headers -->
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    <label class="form-label">Ingredient</label>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Quantity</label>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Unit (g, ml, etc)</label>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Delete</label>
                 </div>
             </div>
-            <button type="button" class="btn btn-secondary" id="add-ingredient">+ Add Ingredient</button>
-        </div>
+            {% for form in ingredients_form.forms %}
+            <div class="row mb-2">
+                <div class="col-md-4">
+                    {{ form.ingredient }}
+                    {% if form.ingredient.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.ingredient.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    {{ form.quantity }}
+                    {% if form.quantity.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.quantity.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-3">
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.amount.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-2">
+                    {% if ingredients_form.can_delete %}
+                        <div class="form-check">
+                            {{ form.DELETE }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 
         <div class="form-group mb-3">
             <label>Dietary Preferences</label>
-            <div id="preferences-container">
-                <div class="preference-row mb-3">
-                    <div class="row">
-                        <div class="col-md-5">
-                            <select class="form-control preference-select" name="diet[]" required>
-                                <option value="">Select dietary preference</option>
-                                {% for diet in diets %}
-                                    <option value="{{ diet.id }}">{{ diet.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-danger remove-preference">×</button>
-                        </div>
-                    </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <select name="diet[]" multiple class="form-control">
+                        {% for diet in diets %}
+                            <option value="{{ diet.id }}">{{ diet.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
-            <button type="button" class="btn btn-secondary" id="add-preference">+ Add Dietary Preference</button>
         </div>
 
         <div class="form-group mb-3">
             <label>Allergens</label>
-            <div id="allergens-container">
-                <div class="allergen-row mb-3">
-                    <div class="row">
-                        <div class="col-md-5">
-                            <select class="form-control allergen-select" name="allergy[]" required>
-                                <option value="">Select allergen</option>
-                                {% for allergy in allergies %}
-                                    <option value="{{ allergy.id }}">{{ allergy.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-danger remove-allergen">×</button>
-                        </div>
-                    </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <select name="allergy[]" multiple class="form-control">
+                        {% for allergy in allergies %}
+                            <option value="{{ allergy.id }}">{{ allergy.name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
             </div>
-            <button type="button" class="btn btn-secondary" id="add-allergen">+ Add Allergen</button>
         </div>
 
         <div class="form-group mb-3">
@@ -128,51 +133,4 @@
     </form>
 </div>
 
-<script>
-    // Копираме JavaScript от модалния прозорец
-    document.addEventListener('DOMContentLoaded', function() {
-        const ingredientsContainer = document.getElementById('ingredients-container');
-        const addIngredientButton = document.getElementById('add-ingredient');
-        const preferencesContainer = document.getElementById('preferences-container');
-        const addPreferenceButton = document.getElementById('add-preference');
-        const allergensContainer = document.getElementById('allergens-container');
-        const addAllergenButton = document.getElementById('add-allergen');
-
-        function addNewRow(container, rowSelector, removeButtonSelector) {
-            const newRow = container.children[0].cloneNode(true);
-            newRow.querySelectorAll('input, select').forEach(input => input.value = '');
-            
-            newRow.querySelector(removeButtonSelector).addEventListener('click', function() {
-                if (container.children.length > 1) {
-                    this.closest(rowSelector).remove();
-                }
-            });
-    
-            container.appendChild(newRow);
-        }
-
-        function initializeRemoveButtons(container, rowSelector, removeButtonSelector) {
-            container.querySelector(removeButtonSelector).addEventListener('click', function() {
-                if (container.children.length > 1) {
-                    this.closest(rowSelector).remove();
-                }
-            });
-        }
-
-        addIngredientButton.addEventListener('click', function() {
-            addNewRow(ingredientsContainer, '.ingredient-row', '.remove-ingredient');
-        });
-        initializeRemoveButtons(ingredientsContainer, '.ingredient-row', '.remove-ingredient');
-
-        addPreferenceButton.addEventListener('click', function() {
-            addNewRow(preferencesContainer, '.preference-row', '.remove-preference');
-        });
-        initializeRemoveButtons(preferencesContainer, '.preference-row', '.remove-preference');
-
-        addAllergenButton.addEventListener('click', function() {
-            addNewRow(allergensContainer, '.allergen-row', '.remove-allergen');
-        });
-        initializeRemoveButtons(allergensContainer, '.allergen-row', '.remove-allergen');
-    });
-</script>
 {% endblock %}

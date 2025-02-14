@@ -7,6 +7,12 @@
     
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
+        {% if error_message %}
+        <div class="alert alert-danger">
+            {{ error_message }}
+        </div>
+        {% endif %}
+
         <div class="mb-3">
             <label for="title" class="form-label">Recipe Title</label>
             <input type="text" class="form-control" id="title" name="title" value="{{ recipe.title }}" required>
@@ -28,39 +34,51 @@
             <textarea class="form-control" id="description" name="description" rows="3" required>{{ recipe.description }}</textarea>
         </div>
         
+        {{ ingredients_form.management_form }}
         <div class="mb-3">
             <label class="form-label">Ingredients</label>
-            <div id="ingredients-container">
-                {% for detail in recipe.ingredientsdetails_set.all %}
+            {% for form in ingredients_form %}
                 <div class="ingredient-row mb-2">
+                    {{ form.id }}
                     <div class="row">
                         <div class="col-md-4">
-                            <select name="ingredient[]" class="form-control" required>
-                                {% for ing in ingredient %}
-                                    <option value="{{ ing.id }}" 
-                                        {% if ing.id == detail.ingredient.id %}selected{% endif %}>
-                                        {{ ing.name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
+                            {{ form.ingredient }}
+                            {% if form.ingredient.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.ingredient.errors }}
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="col-md-3">
-                            <input type="number" name="quantity[]" class="form-control" 
-                                   value="{{ detail.quantity }}" placeholder="Quantity" required>
+                            {{ form.quantity }}
+                            {% if form.quantity.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.quantity.errors }}
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="col-md-3">
-                            <input type="text" name="amount[]" class="form-control" 
-                                   value="{{ detail.amount }}" placeholder="Unit (g, ml, etc)" required>
+                            {{ form.amount }}
+                            {% if form.amount.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.amount.errors }}
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="col-md-2">
-                            <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
+                            {% if ingredients_form.can_delete %}
+                                <div class="form-check">
+                {{ form.DELETE }}
+                <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">
+                    Delete ingredient
+                </label>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
-            <button type="button" class="btn btn-secondary mt-2" id="add-ingredient">Add Ingredient</button>
+            {% endfor %}
         </div>
+    
         
         <div class="mb-3">
             <label for="cooking_time" class="form-label">Cooking Time (minutes)</label>
@@ -110,53 +128,5 @@
     </form>
 </div>
 
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('ingredients-container');
-    const addButton = document.getElementById('add-ingredient');
-    
-    // Template for new ingredient row
-    function getIngredientRowTemplate() {
-    return `
-        <div class="ingredient-row mb-2">
-            <div class="row">
-                <div class="col-md-4">
-                    <select name="ingredient[]" class="form-control" required>  <!-- Промяна тук: добавено [] -->
-                        {% for ing in ingredient %}
-                            <option value="{{ ing.id }}">{{ ing.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="number" name="quantity[]" class="form-control"   <!-- Промяна тук: добавено [] -->
-                           placeholder="Quantity" required>
-                </div>
-                <div class="col-md-3">
-                    <input type="text" name="amount[]" class="form-control"   <!-- Промяна тук: добавено [] -->
-                           placeholder="Unit (g, ml, etc)" required>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger remove-ingredient">Remove</button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-    
-    // Add new ingredient row
-    addButton.addEventListener('click', function() {
-        container.insertAdjacentHTML('beforeend', getIngredientRowTemplate());
-    });
-    
-    // Remove ingredient row
-    container.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-ingredient')) {
-            e.target.closest('.ingredient-row').remove();
-        }
-    });
-});
-</script>
-{% endblock %}
 
 {% endblock %}

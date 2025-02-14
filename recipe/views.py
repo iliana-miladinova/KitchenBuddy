@@ -9,17 +9,21 @@ from ingredients.models import Ingredient
 from foodPreference.models import Allergy, Diet
 from Users.models import Profile
 import random
+from django.forms import inlineformset_factory
+from .forms import IngredientsDetailsForm
 
 # Create your views here.
 @login_required
 def list_recipe(request):
     sort_by = request.GET.get('sort_by', 'title') 
+
     sorting_options = {'title': 'title',
-                       'rating': 'average_rating',
+                       'rating': '-average_rating',
                        'cooking_time': 'cooking_time',
                        'calories': 'calories'}
 
     sorting = sorting_options.get(sort_by, 'title')
+
     #Get all the recipes per user
     users_recipes = Recipe.objects.filter(user=request.user).order_by(sorting)
 
@@ -47,60 +51,62 @@ def list_recipe(request):
         'sorting_options': sorting_options,
         'ingredients': ingredients,
         'diets': diets,          
-        'allergies': allergies
+        'allergies': allergies,
+        'diets_filter': filtered_recipes_diets,
+        'allergies_filter': filtered_recipes_allergies
     }
 
     return render(request, 'recipe/list_recipe.html', context)
 
 @login_required
 def recipe_create(request):
-    if request.method == 'POST':
-        title = request.POST['title']
-        description = request.POST['description']
-        #ingredients = request.POST['ingredients']
-        cooking_time = request.POST['cooking_time']
-        calories = request.POST['calories']
-        dish_type = request.POST['dish_type']
-        image = request.FILES['image']
+    IngredientsForm = inlineformset_factory(
+        Recipe, 
+        IngredientsDetails, 
+        form=IngredientsDetailsForm,
+        extra=20, # Брой празни форми
+        can_delete=True
+    )
 
-        recipe = Recipe.objects.create(user=request.user, title=title, description=description,
+    
+
+    if request.method == 'POST':
+        ingredients_form = IngredientsForm(request.POST, request.FILES)
+        if ingredients_form.is_valid():
+            title = request.POST['title']
+            description = request.POST['description']
+            cooking_time = request.POST['cooking_time']
+            calories = request.POST['calories']
+            dish_type = request.POST['dish_type']
+            image = request.FILES['image']
+
+            recipe = Recipe.objects.create(user=request.user, title=title, description=description,
                                        cooking_time=cooking_time, calories=calories, dish_type=dish_type,
                                        image=image)
+            ingredients_form.instance = recipe
+            ingredients_form.save()
         
-        diets = request.POST.getlist('diet[]')
-        if diets:
-            recipe.diet.set(diets)
+            diets = request.POST.getlist('diet[]')
+            if diets:
+                recipe.diet.set(diets)
         
-        allergies = request.POST.getlist('allergy[]')
-        if allergies:
-            recipe.allergies.set(allergies)
+            allergies = request.POST.getlist('allergy[]')
+            if allergies:
+                recipe.allergies.set(allergies)
 
-        ingredients = request.POST.getlist('ingredient[]')
-        quantity = request.POST.getlist('quantity[]')
-        amount = request.POST.getlist('amount[]')
-
-        for ing in range(len(ingredients)):
-            ingredient = Ingredient.objects.get(id=ingredients[ing])
-
-            IngredientsDetails.objects.create(recipe=recipe, ingredient=ingredient, quantity=quantity[ing], amount=amount[ing])
-
-        # context = {
-        # 'ingredients': Ingredient.objects.all().order_by('category', 'name'),
-        # 'dietary_preferences': Diet.objects.all().order_by('name'),  
-        # 'allergens': Allergy.objects.all().order_by('name'),
-        # 'users_recipes': Recipe.objects.filter(user=request.user),
-        # 'all_recipes': Recipe.objects.all()
-        # }
         
-        return redirect('list_recipe')
+        
+            return redirect('list_recipe')
     else:
+        ingredients_form = IngredientsForm()
         ingredients = Ingredient.objects.all().order_by('category', 'name')
         diets = Diet.objects.all().order_by('name')
         allergies = Allergy.objects.all().order_by('name')
         context = {
             'ingredients': ingredients,
             'diets': diets,
-            'allergies': allergies
+            'allergies': allergies,
+            'ingredients_form': ingredients_form
         }
         return render(request, 'recipe/create_recipe.html', context)
 
@@ -144,109 +150,79 @@ def recipe_details(request, recipe_id):
 
     return render(request, 'recipe/recipe_details.html', context)
 
+@login_required
 def recipe_update(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     if request.user == recipe.user:
+        IngredientsForm = inlineformset_factory(Recipe, IngredientsDetails,
+                                                 form=IngredientsDetailsForm, extra=10,
+                                                 can_delete=True)
+        
+        error_message = None
         if request.method == 'POST':
-            dish_type = request.POST.get('dish_type')
-            if not dish_type:
-                dish_type = recipe.dish_type 
-        
-            title = request.POST.get('title')
-            description = request.POST.get('description')
-            cooking_time = request.POST.get('cooking_time')
-            calories = request.POST.get('calories')
-            dish_type = request.POST.get('dish_type')
-            
-            recipe.title = title
-            recipe.description = description
-            recipe.cooking_time = cooking_time
-            recipe.calories = calories
-            recipe.dish_type = dish_type
-        
-            
-            if 'image' in request.FILES:
-                recipe.image = request.FILES['image']
-
-            recipe.save()
-
-            #recipe.ingredients.all().delete()
-            print("POST data:", request.POST)
-            print("Files:", request.FILES)
-            
-
-            ingredients = request.POST.getlist('ingredient[]')
-            quantity = request.POST.getlist('quantity[]')
-            amount = request.POST.getlist('amount[]')
-
-            print("Ingredients before processing:", ingredients)
-            print("Quantities before processing:", quantity)
-            print("Amounts before processing:", amount)
-            #IngredientsDetails.objects.filter(recipe=recipe).delete()
-
-
-            # if ingredients and quantity and amount and len(ingredients) == len(quantity) == len(amount):
-            #     IngredientsDetails.objects.filter(recipe=recipe).delete()
-            #     for ing in range(len(ingredients)):
-            #         ingredient = Ingredient.objects.get(id=ingredients[ing])
-            #         IngredientsDetails.objects.create(recipe=recipe, 
-            #                                         ingredient=ingredient, 
-            #                                         quantity=quantity[ing], 
-            #                                         amount=amount[ing])
-
             try:
-                # Изтрий старите съставки
-                if ingredients and quantity and amount and len(ingredients) == len(quantity) == len(amount):
-                    IngredientsDetails.objects.filter(recipe=recipe).delete()
-                    for ing in range(len(ingredients)):
-                        ingredient = Ingredient.objects.get(id=ingredients[ing])
-                        IngredientsDetails.objects.create(recipe=recipe, 
-                                                    ingredient=ingredient, 
-                                                    quantity=quantity[ing], 
-                                                    amount=amount[ing])
-                        print(f"Ingredient {ingredient.name} created successfully")
-                
-                print("All ingredients processed")
-                
-            except Exception as e:
-                print(f"Error processing ingredients: {e}")
-           
-            # for ing in range(len(ingredients)):
-            #     ingredient = Ingredient.objects.get(id=ingredients[ing])
+                dish_type = request.POST.get('dish_type')
+                if not dish_type:
+                    dish_type = recipe.dish_type 
+        
+                title = request.POST.get('title')
+                description = request.POST.get('description')
+                cooking_time = request.POST.get('cooking_time')
+                calories = request.POST.get('calories')
+                dish_type = request.POST.get('dish_type')
 
-            #     IngredientsDetails.objects.create(recipe=recipe, ingredient=ingredient, quantity=quantity[ing], amount=amount[ing])
+                ingredients_form = IngredientsForm(request.POST, instance=recipe)
+                if not ingredients_form.is_valid():
+                    error_message = 'Invalid ingredients.'
+                    raise ValueError(error_message)
             
-            # diets = request.POST.getlist('diet[]')
-            # recipe.diet.clear()
-            # for diet_id in diets:
-            #     recipe.diet.add(diet_id)
-            diets = request.POST.getlist('diet_name')
-            if diets:
-                recipe.diet.set(diets)
+                recipe.title = title
+                recipe.description = description
+                recipe.cooking_time = cooking_time
+                recipe.calories = calories
+                recipe.dish_type = dish_type
+        
+            
+                if 'image' in request.FILES:
+                    recipe.image = request.FILES['image']
+
+                recipe.save()
+                ingredients_form.save()
+
+            
+            
+                diets = request.POST.getlist('diet_name')
+                if diets:
+                    recipe.diet.set(diets)
 
             # allergies = request.POST.getlist('allergy[]')
             # recipe.allergies.clear()
             # for allergy_id in allergies:
             #     recipe.allergies.add(allergy_id)
 
-            allergies = request.POST.getlist('allergy[]')
-            if allergies:
-                recipe.allergies.set(allergies)
+                allergies = request.POST.getlist('allergy[]')
+                if allergies:
+                    recipe.allergies.set(allergies)
 
             
-            return redirect('recipe_details', recipe_id=recipe_id)
+                return redirect('recipe_details', recipe_id=recipe_id)
+            except Exception as e:
+                error_message = f'Error: {str(e)}'
+        else:
+            ingredients_form = IngredientsForm(instance=recipe)
         
     context = {
         'recipe': recipe,
         'ingredient': Ingredient.objects.all().order_by('category', 'name'),
         'diets': Diet.objects.all().order_by('name'),
         'allergies': Allergy.objects.all().order_by('name'),
-        'current_ingredients': IngredientsDetails.objects.filter(recipe=recipe)
+        'current_ingredients': IngredientsDetails.objects.filter(recipe=recipe),
+        'ingredients_form': ingredients_form,
+        'error_message': error_message
     }
     return render(request, 'recipe/recipe_update.html', context)
 
-
-
+@login_required
 def add_rating(request, recipe_id):
     if request.method =='POST':
         recipe = get_object_or_404(Recipe, id=recipe_id)
@@ -264,6 +240,7 @@ def add_rating(request, recipe_id):
     #??????
     return redirect('recipe_details', recipe_id=recipe_id)
 
+@login_required
 def add_comment(request, recipe_id):
     if request.method == 'POST':
         recipe = get_object_or_404(Recipe, id=recipe_id)
