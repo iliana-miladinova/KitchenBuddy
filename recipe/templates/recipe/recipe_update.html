@@ -107,7 +107,7 @@
 
         <div class="mb-3">
             <label class="form-label">Diets</label>
-            <select class="form-control" name="diet_name" multiple>
+            <select class="form-control" name="diet_list" multiple>
                 {% for diet in diets %}
                     <option value="{{ diet.id }}" 
                         {% if diet in recipe.diet.all %}selected{% endif %}>
@@ -119,7 +119,7 @@
         
         <div class="mb-3">
             <label class="form-label">Allergies</label>
-            <select class="form-control" name="allergy[]" multiple>
+            <select class="form-control" name="allergy_list" multiple>
                 {% for allergy in allergies %}
                     <option value="{{ allergy.id }}" 
                         {% if allergy in recipe.allergies.all %}selected{% endif %}>

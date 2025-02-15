@@ -86,28 +86,31 @@ def recipe_create(request):
             ingredients_form.instance = recipe
             ingredients_form.save()
         
-            diets = request.POST.getlist('diet[]')
+            diets = request.POST.getlist('diet_list')
             if diets:
                 recipe.diet.set(diets)
         
-            allergies = request.POST.getlist('allergy[]')
+            allergies = request.POST.getlist('allergy_list')
             if allergies:
                 recipe.allergies.set(allergies)
 
         
         
             return redirect('list_recipe')
+    
     else:
         ingredients_form = IngredientsForm()
         ingredients = Ingredient.objects.all().order_by('category', 'name')
         diets = Diet.objects.all().order_by('name')
         allergies = Allergy.objects.all().order_by('name')
+
         context = {
             'ingredients': ingredients,
             'diets': diets,
             'allergies': allergies,
             'ingredients_form': ingredients_form
         }
+
         return render(request, 'recipe/create_recipe.html', context)
 
     
@@ -191,7 +194,7 @@ def recipe_update(request, recipe_id):
 
             
             
-                diets = request.POST.getlist('diet_name')
+                diets = request.POST.getlist('diet_list')
                 if diets:
                     recipe.diet.set(diets)
 
@@ -200,7 +203,7 @@ def recipe_update(request, recipe_id):
             # for allergy_id in allergies:
             #     recipe.allergies.add(allergy_id)
 
-                allergies = request.POST.getlist('allergy[]')
+                allergies = request.POST.getlist('allergy_list')
                 if allergies:
                     recipe.allergies.set(allergies)
 
@@ -210,16 +213,22 @@ def recipe_update(request, recipe_id):
                 error_message = f'Error: {str(e)}'
         else:
             ingredients_form = IngredientsForm(instance=recipe)
-        
+    
+    ingredient = Ingredient.objects.all().order_by('category', 'name')
+    diet = Diet.objects.all().order_by('name')
+    allergy = Allergy.objects.all().order_by('name')
+    current_ingredients = IngredientsDetails.objects.filter(recipe=recipe)
+
     context = {
         'recipe': recipe,
-        'ingredient': Ingredient.objects.all().order_by('category', 'name'),
-        'diets': Diet.objects.all().order_by('name'),
-        'allergies': Allergy.objects.all().order_by('name'),
-        'current_ingredients': IngredientsDetails.objects.filter(recipe=recipe),
+        'ingredient': ingredient,
+        'diets': diet,
+        'allergies': allergy,
+        'current_ingredients': current_ingredients,
         'ingredients_form': ingredients_form,
         'error_message': error_message
     }
+
     return render(request, 'recipe/recipe_update.html', context)
 
 @login_required
@@ -264,8 +273,8 @@ def get_menu(request):
         calories_per_day = 2000
     
     calories_breakfast = calories_per_day * 0.25
-    calories_lunch = calories_per_day * 0.4
-    calories_dinner = calories_per_day * 0.35
+    #calories_lunch = calories_per_day * 0.4
+    #calories_dinner = calories_per_day * 0.35
 
     favourite_recipes = Recipe.objects.filter(favourite=request.user)
 

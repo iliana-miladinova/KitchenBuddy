@@ -93,7 +93,7 @@
             <label>Dietary Preferences</label>
             <div class="row">
                 <div class="col-md-5">
-                    <select name="diet[]" multiple class="form-control">
+                    <select name="diet_list" multiple class="form-control">
                         {% for diet in diets %}
                             <option value="{{ diet.id }}">{{ diet.name }}</option>
                         {% endfor %}
@@ -106,7 +106,7 @@
             <label>Allergens</label>
             <div class="row">
                 <div class="col-md-5">
-                    <select name="allergy[]" multiple class="form-control">
+                    <select name="allergy_list" multiple class="form-control">
                         {% for allergy in allergies %}
                             <option value="{{ allergy.id }}">{{ allergy.name }}</option>
                         {% endfor %}
