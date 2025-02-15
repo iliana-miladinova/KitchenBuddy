@@ -136,6 +136,7 @@ class TestFavouriteRecipeViews(TestCase):
         self.client.login(username='iliana20', password='1234')
         
         self.image = SimpleUploadedFile(name='food_image.jpg', content=b'file_content', content_type='image/jpeg')
+        
         self.recipe = Recipe.objects.create(
             user=self.user,
             title='my_recipe',
