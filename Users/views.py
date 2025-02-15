@@ -41,7 +41,7 @@ def register_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        redirect('home')
+        return redirect('home')
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -78,7 +78,7 @@ def profile(request):
 
         if (not user_profile.age or not user_profile.gender or not user_profile.weight or not 
             user_profile.height or not user_profile.activity):
-            messages.error(request, 'Some fields are not filled')
+            #messages.error(request, 'Some fields are not filled')
             context = {'user_profile': user_profile}
             return render(request, 'Users/profile.html', context)
         

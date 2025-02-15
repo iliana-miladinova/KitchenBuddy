@@ -4,4 +4,4 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 @login_required
 def index(request):
-    return render(request, "base.html")#HttpResponse('<h1>Welcome!</h1>')
+    return render(request, "base.html")
