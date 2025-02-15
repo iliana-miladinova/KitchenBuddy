@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
+from Users.models import Profile
 
 class TestUsersRegisterView(TestCase):
     def setUp(self):
@@ -155,6 +156,7 @@ class TestUsersLoginView(TestCase):
 
         self.assertRedirects(response, reverse('home'))
 
+
 class TestUsersLogoutView(TestCase):
     def test_logout_view_success(self): 
         User.objects.create_user(
@@ -171,6 +173,7 @@ class TestUsersLogoutView(TestCase):
         self.assertRedirects(response, reverse('login'))
         self.assertFalse(response.wsgi_request.user.is_authenticated)
 
+
 class TestUsersProfileView(TestCase):
     def setUp(self):
         self.url = reverse('profile')
@@ -183,23 +186,84 @@ class TestUsersProfileView(TestCase):
 
         self.client.login(username='Iliana20', password='Iliana123')
 
-    def test_profile_view_get(self):
+        self.valid_data = {
+            'age': 20,
+            'gender': 'Female',
+            'weight': 53,
+            'height': 167,
+            'activity': 'moderate'
+        }
+
+        self.valid_data_male = {
+            'age': 20,
+            'gender': 'Male',
+            'weight': 72,
+            'height': 178,
+            'activity': 'moderate'
+        }
+
+    def test_profile_view_get_no_existing_profile(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "Users/profile.html")
+        self.assertFalse(Profile.objects.filter(user=self.user).exists())
 
-    def test_profile_view_not_logged_in(self):
-        self.client.logout()
+    def test_profile_view_get_existing_profile(self):
+        profile = Profile.objects.create(
+            user=self.user,
+            age=self.valid_data['age'],
+            gender=self.valid_data['gender'],
+            weight=self.valid_data['weight'],
+            height=self.valid_data['height'],
+            activity=self.valid_data['activity'],
+            calories=2035
+        )
+
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse('login'))
 
-        
-        
-    
-            
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "Users/profile.html")
 
+        self.assertEqual(response.context['user_profile'], profile)
 
-    
-        
+    def test_profile_view_create_profile(self):
+        response = self.client.post(self.url, self.valid_data)
 
-        
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Profile.objects.filter(user=self.user).exists())
+
+        profile = Profile.objects.get(user=self.user)
+        self.assertEqual(profile.age, self.valid_data['age'])
+        self.assertEqual(profile.gender, self.valid_data['gender'])
+        self.assertEqual(profile.weight, self.valid_data['weight'])
+        self.assertEqual(profile.height, self.valid_data['height'])
+        self.assertEqual(profile.activity, self.valid_data['activity'])
+        self.assertEqual(profile.calories, 2035)
+
+    def test_profile_view_update_profile(self):
+        Profile.objects.create(
+            user=self.user,
+            age=25,
+            gender=self.valid_data['gender'],
+            weight=self.valid_data['weight'],
+            height=self.valid_data['height'],
+            activity='light',
+        )
+
+        response = self.client.post(self.url, self.valid_data)
+        self.assertEqual(response.status_code, 200)
+        profile = Profile.objects.get(user=self.user)
+        self.assertEqual(profile.age, self.valid_data['age'])
+        self.assertEqual(profile.activity, self.valid_data['activity'])
+
+    def test_profile_view_calculate_calories_female(self):
+        response = self.client.post(self.url, self.valid_data)
+
+        profile = Profile.objects.get(user=self.user)
+        self.assertEqual(profile.calories, 2035)
+
+    def test_profile_view_calculate_calories_male(self):
+        response = self.client.post(self.url, self.valid_data_male)
+
+        profile = Profile.objects.get(user=self.user)
+        self.assertEqual(profile.calories, 2693)
