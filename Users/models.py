@@ -10,10 +10,10 @@ class Profile(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.IntegerField(null=True, blank=True)
-    gender = models.CharField(max_length=6, choices=GENDER)
+    gender = models.CharField(max_length=6, choices=GENDER, blank=True)
     weight = models.FloatField(null=True, blank=True)
     height = models.FloatField(null=True, blank=True)
-    activity = models.CharField(max_length=20, choices=ACTIVITY)
+    activity = models.CharField(max_length=20, choices=ACTIVITY, blank=True)
     calories = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
