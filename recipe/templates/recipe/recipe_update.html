@@ -42,12 +42,27 @@
                     {{ form.id }}
                     <div class="row">
                         <div class="col-md-4">
-                            {{ form.ingredient }}
-                            {% if form.ingredient.errors %}
-                                <div class="alert alert-danger">
-                                    {{ form.ingredient.errors }}
-                                </div>
-                            {% endif %}
+                            <select name="{{ form.ingredient.html_name }}" 
+                            id="{{ form.ingredient.id_for_label }}" 
+                            class="form-control {% if form.ingredient.errors %}is-invalid{% endif %}">
+                        <option value="">Select ingredient</option>
+                        {% regroup form.ingredient.field.queryset by get_category_display as ingredient_list %}
+                        {% for category in ingredient_list %}
+                            <optgroup label="{{ category.grouper }}">
+                                {% for ingredient in category.list %}
+                                    <option value="{{ ingredient.id }}" 
+                                            {% if form.ingredient.value|stringformat:"s" == ingredient.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ ingredient.name }}
+                                    </option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+                    {% if form.ingredient.errors %}
+                        <div class="alert alert-danger">
+                            {{ form.ingredient.errors }}
+                        </div>
+                    {% endif %}
                         </div>
                         <div class="col-md-3">
                             {{ form.quantity }}

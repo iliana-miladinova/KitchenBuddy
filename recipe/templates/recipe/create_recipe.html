@@ -13,61 +13,81 @@
             <input type="text" class="form-control" id="title" name="title" required>
         </div>
 
-        <div class="form-group mb-3">
-            
-            {{ ingredients_form.management_form }}
-            
-            <!-- Headers -->
-            <div class="row mb-2">
-                <div class="col-md-4">
-                    <label class="form-label">Ingredient</label>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Quantity</label>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Unit (g, ml, etc)</label>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Delete</label>
-                </div>
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Ingredients</h4>
             </div>
-            {% for form in ingredients_form.forms %}
-            <div class="row mb-2">
-                <div class="col-md-4">
-                    {{ form.ingredient }}
-                    {% if form.ingredient.errors %}
-                        <div class="alert alert-danger">
-                            {{ form.ingredient.errors }}
-                        </div>
-                    {% endif %}
+            <div class="card-body">
+                {{ ingredients_form.management_form }}
+                
+                <!-- Headers -->
+                <div class="row mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Ingredient</label>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Quantity</label>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Unit</label>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Delete</label>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    {{ form.quantity }}
-                    {% if form.quantity.errors %}
-                        <div class="alert alert-danger">
-                            {{ form.quantity.errors }}
-                        </div>
-                    {% endif %}
+                {% for form in ingredients_form.forms %}
+                <div class="row mb-2 ingredient-form">
+                    <div class="col-md-4">
+                        <select name="{{ form.ingredient.html_name }}" 
+                                id="{{ form.ingredient.id_for_label }}" 
+                                class="form-select {% if form.ingredient.errors %}is-invalid{% endif %}">
+                            <option value="">Select ingredient</option>
+                            {% regroup form.ingredient.field.queryset by get_category_display as ingredient_list %}
+                            {% for category in ingredient_list %}
+                                <optgroup label="{{ category.grouper }}">
+                                    {% for ingredient in category.list %}
+                                        <option value="{{ ingredient.id }}" 
+                                                {% if form.ingredient.value|stringformat:"s" == ingredient.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ ingredient.name }}
+                                        </option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                        </select>
+                        {% if form.ingredient.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.ingredient.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.quantity }}
+                        {% if form.quantity.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.quantity.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.amount.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-2">
+                        {% if ingredients_form.can_delete %}
+                            <div class="form-check">
+                                {{ form.DELETE }}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    {{ form.amount }}
-                    {% if form.amount.errors %}
-                        <div class="alert alert-danger">
-                            {{ form.amount.errors }}
-                        </div>
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if ingredients_form.can_delete %}
-                        <div class="form-check">
-                            {{ form.DELETE }}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
+
 
         <div class="form-group mb-3">
             <label>Dietary Preferences</label>
