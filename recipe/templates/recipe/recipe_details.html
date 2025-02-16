@@ -33,6 +33,14 @@
                     {% endif %}
                 </a>
             {% endif %}
+
+            <form method="POST" action="{% url 'add_to_calorie_tracker' recipe.id %}" class="mb-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    Add to Calorie Tracker
+                </button>
+            </form>
+
             <div class="recipe-stats">
                 <div class="stat-item">
                     <i class="fas fa-star"></i>

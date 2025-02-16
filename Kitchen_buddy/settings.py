@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'recipe',
     'ingredients',
     'foodPreference',
-    'substitutionIngredients'
+    'substitutionIngredients',
+    'calorieTracker'
 ]
 
 MIDDLEWARE = [

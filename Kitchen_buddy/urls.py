@@ -25,5 +25,6 @@ urlpatterns = [
     path('accounts/', include('Users.urls')),
     path('recipes/', include('recipe.urls')),
     path('ingredients/', include('ingredients.urls')),
-    path('substitutionIngredients/', include('substitutionIngredients.urls'))
+    path('substitutionIngredients/', include('substitutionIngredients.urls')),
+    path('calorieTracker/', include('calorieTracker.urls'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

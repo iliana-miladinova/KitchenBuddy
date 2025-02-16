@@ -28,7 +28,7 @@ class Recipe(models.Model):
     diet = models.ManyToManyField(Diet, related_name='recipe_diet', blank=True)
     allergies = models.ManyToManyField(Allergy, related_name='recipe_allergies', blank=True)
     #image_url = models.CharField(max_length=500, null=True, blank=True)
-    
+
     class Meta:
         ordering = ['title']
         unique_together = ['title', 'image']

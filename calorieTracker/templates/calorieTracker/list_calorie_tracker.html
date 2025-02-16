@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Calorie Tracker</h1>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if not user_profile %}
+    <div class="alert alert-warning mb-4">
+        <i class="fas fa-exclamation-triangle"></i>
+        Please <a href="{% url 'profile' %}">set up your profile</a> to get personalized calorie recommendations.
+    </div>
+    {% endif %}
+    
+    <!-- Calorie Summary -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <h5>Recommended Daily Calories</h5>
+                    <h3 class="text-primary">{{ calorie_limit }}</h3>
+                </div>
+                <div class="col-md-4">
+                    <h5>Consumed Today</h5>
+                    <h3 class="{% if no_left_calories %}text-danger{% else %}text-success{% endif %}">
+                        {{ calories_sum }}
+                    </h3>
+                </div>
+                <div class="col-md-4">
+                    <h5>Remaining</h5>
+                    <h3 class="{% if remaining_calories < 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ remaining_calories }}
+                    </h3>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="progress mt-3" style="height: 25px;">
+                <div class="progress-bar {% if no_left_calories %}bg-danger{% else %}bg-success{% endif %}" 
+                     role="progressbar">
+                    {{ calories_sum }} / {{ calorie_limit }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if calories_exceeded %}
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        You have eaten {{ remaining_calories }} too manycalories!
+    </div>
+    {% endif %}
+
+    <!-- Tracked Recipes -->
+    {% if recipes_in_tracker %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Recipe</th>
+                        <th>Servings</th>
+                        <th>Calories per Serving</th>
+                        <th>Total Calories</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recipes_in_tracker %}
+                    <tr>
+                        <td>{{ item.recipe.title }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'update_servings' item.recipe.id %}" class="d-flex">
+                                {% csrf_token %}
+                                <input type="number" 
+                                       name="servings" 
+                                       value="{{ item.servings }}"
+                                       min="1" 
+                                       class="form-control form-control-sm me-2" 
+                                       style="width: 70px;">
+                                <button type="submit" class="btn btn-secondary btn-sm">Update</button>
+                            </form>
+                        </td>
+                        <td>{{ item.recipe.calories }}</td>
+                        <td>{{ item.get_calories_per_recipe }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'remove_from_calorie_tracker' item.recipe.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No recipes in tracker.
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'list_recipe' %}" class="btn btn-primary">Search For Recipes</a>
+        {% if user_profile %}
+            <a href="{% url 'profile' %}" class="btn btn-outline-primary">Update Profile</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
