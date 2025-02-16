@@ -12,6 +12,7 @@ def list_calorie_tracker(request):
         user_profile = request.user.profile
         calorie_limit = user_profile.calories
     except Profile.DoesNotExist:
+        user_profile = None
         calorie_limit = 2000
 
     recipes_in_tracker = CalorieTracker.objects.filter(user=request.user)

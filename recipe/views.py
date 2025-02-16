@@ -113,6 +113,20 @@ def recipe_create(request):
 
         return render(request, 'recipe/create_recipe.html', context)
 
+@login_required
+def recipe_delete(request, recipe_id):
+    if request.method == 'POST':
+        recipe = get_object_or_404(Recipe, id=recipe_id)
+
+        if recipe.user != request.user:
+            print("Unauthorized access attempt")
+            return redirect('recipe_details', recipe_id=recipe_id)
+        
+        print(f"Deleting recipe: {recipe.title}")
+        recipe.delete()
+        return redirect('list_recipe')
+    print('Mistake')
+    return redirect('list_recipe')
     
 @login_required
 def add_remove_favourite(request, recipe_id):

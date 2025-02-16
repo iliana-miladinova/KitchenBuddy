@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="container text-center mt-5">
+    <link rel="stylesheet" type="text/css" href="{% static 'main_app/welcome.css' %}">
+    <div class="welcome-section">
+        <h1 class="display-4 logo-font">Welcome to Kitchen Buddy</h1>
+        {% if user.is_authenticated %}
+            <p class="lead">Hello, {{ user.username }}!</p>
+            <div class="mt-4">
+                <a href="{% url 'list_calorie_tracker' %}" class="btn btn-success mx-2">My Calorie Tracker</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

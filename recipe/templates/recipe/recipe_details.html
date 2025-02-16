@@ -10,6 +10,12 @@
     <a href="{% url 'recipe_update' recipe_id=recipe.id %}" class="btn btn-primary edit-recipe-btn">
         <i class="fas fa-edit"></i> Edit Recipe
     </a>
+    <form method="POST" action="{% url 'recipe_delete' recipe_id=recipe.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete Recipe
+        </button>
+    </form>
     {% endif %}
 </div>
 
