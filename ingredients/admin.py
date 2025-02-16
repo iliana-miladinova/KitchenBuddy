@@ -13,9 +13,9 @@ class IngredientResource(resources.ModelResource):
 class IngredientAdmin(ImportExportModelAdmin):
     resource_class = IngredientResource
     model = Ingredient
-    list_display = ('name', 'category')  # Показва тези полета в списъка
-    list_filter = ('category',)          # Добавя филтър по категория
-    search_fields = ('name',)            # Добавя търсачка по име
+    list_display = ('name', 'category')  
+    list_filter = ('category',)          
+    search_fields = ('name',)            
     ordering = ('category', 'name')
     inlines = [SubstituteInline,]
 

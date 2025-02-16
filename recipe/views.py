@@ -64,11 +64,9 @@ def recipe_create(request):
         Recipe, 
         IngredientsDetails, 
         form=IngredientsDetailsForm,
-        extra=20, # Брой празни форми
+        extra=20, # Broyat na praznite formi
         can_delete=True
     )
-
-    
 
     if request.method == 'POST':
         ingredients_form = IngredientsForm(request.POST, request.FILES)
@@ -83,6 +81,7 @@ def recipe_create(request):
             recipe = Recipe.objects.create(user=request.user, title=title, description=description,
                                        cooking_time=cooking_time, calories=calories, dish_type=dish_type,
                                        image=image)
+            
             ingredients_form.instance = recipe
             ingredients_form.save()
         
@@ -94,9 +93,7 @@ def recipe_create(request):
             if allergies:
                 recipe.allergies.set(allergies)
 
-        
-        
-            return redirect('list_recipe')
+        return redirect('list_recipe')
     
     else:
         ingredients_form = IngredientsForm()
@@ -119,13 +116,11 @@ def recipe_delete(request, recipe_id):
         recipe = get_object_or_404(Recipe, id=recipe_id)
 
         if recipe.user != request.user:
-            print("Unauthorized access attempt")
             return redirect('recipe_details', recipe_id=recipe_id)
         
-        print(f"Deleting recipe: {recipe.title}")
         recipe.delete()
         return redirect('list_recipe')
-    print('Mistake')
+    
     return redirect('list_recipe')
     
 @login_required
@@ -152,7 +147,6 @@ def favourite_recipes(request):
 @login_required
 def recipe_details(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
-    #ingredients = recipe.ingredients.all()
     ingredients = IngredientsDetails.objects.filter(recipe=recipe)
     comments = recipe.comment.all()
     is_favourite_recipe = recipe.favourite.filter(id=request.user.id).exists()
@@ -172,7 +166,7 @@ def recipe_update(request, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     if request.user == recipe.user:
         IngredientsForm = inlineformset_factory(Recipe, IngredientsDetails,
-                                                 form=IngredientsDetailsForm, extra=10,
+                                                 form=IngredientsDetailsForm, extra=20,
                                                  can_delete=True)
         
         error_message = None
@@ -199,23 +193,15 @@ def recipe_update(request, recipe_id):
                 recipe.calories = calories
                 recipe.dish_type = dish_type
         
-            
                 if 'image' in request.FILES:
                     recipe.image = request.FILES['image']
 
                 recipe.save()
                 ingredients_form.save()
 
-            
-            
                 diets = request.POST.getlist('diet_list')
                 if diets:
                     recipe.diet.set(diets)
-
-            # allergies = request.POST.getlist('allergy[]')
-            # recipe.allergies.clear()
-            # for allergy_id in allergies:
-            #     recipe.allergies.add(allergy_id)
 
                 allergies = request.POST.getlist('allergy_list')
                 if allergies:
@@ -260,7 +246,6 @@ def add_rating(request, recipe_id):
 
         return redirect('recipe_details', recipe_id=recipe_id)
     
-    #??????
     return redirect('recipe_details', recipe_id=recipe_id)
 
 @login_required
@@ -275,7 +260,6 @@ def add_comment(request, recipe_id):
         
         return redirect('recipe_details', recipe_id=recipe_id)
     
-    #??????
     return redirect('recipe_details', recipe_id=recipe_id)
 
 @login_required
@@ -287,8 +271,8 @@ def get_menu(request):
         calories_per_day = 2000
     
     calories_breakfast = calories_per_day * 0.25
-    #calories_lunch = calories_per_day * 0.4
-    #calories_dinner = calories_per_day * 0.35
+    #calories_lunch ------ calories_per_day * 0.4
+    #calories_dinner ------ calories_per_day * 0.35
 
     favourite_recipes = Recipe.objects.filter(favourite=request.user)
 
@@ -306,7 +290,6 @@ def get_menu(request):
         }
     }
     
-    #breakfast_recipes = favourite_recipes.filter(dish_type='breakfast')
     breakfast_recipes = list(favourite_recipes.filter(dish_type='breakfast'))
     random.shuffle(breakfast_recipes)
     for recipe in breakfast_recipes:
@@ -314,22 +297,17 @@ def get_menu(request):
             menu['breakfast'] = recipe
             break
 
-    #calories_lunch_remaining = calories_lunch
     starter_calories_lunch = calories_per_day * 0.1
     main_calories_lunch = calories_per_day * 0.25
     dessert_calories_lunch = calories_per_day * 0.05
 
-    #starter_recipes = favourite_recipes.filter(dish_type='starter')
     starter_recipes = list(favourite_recipes.filter(dish_type='starter'))
     random.shuffle(starter_recipes)
     for recipe in starter_recipes:
-        #starter_calories = calories_lunch_remaining * 0.1
         if recipe.calories <= starter_calories_lunch:
             menu['lunch']['starter'] = recipe
-            #calories_lunch_remaining -= recipe.calories
             break
 
-    #main_recipes = favourite_recipes.filter(dish_type='main')
     main_recipes = list(favourite_recipes.filter(dish_type='main'))
     random.shuffle(main_recipes)
     for recipe in main_recipes:
@@ -337,7 +315,6 @@ def get_menu(request):
             menu['lunch']['main'] = recipe
             break
 
-    #dessert_recipes = favourite_recipes.filter(dish_type='dessert')
     dessert_recipes = list(favourite_recipes.filter(dish_type='dessert'))
     random.shuffle(dessert_recipes)
     for recipe in dessert_recipes:
@@ -349,17 +326,13 @@ def get_menu(request):
     main_calories_dinner = calories_per_day * 0.20
     dessert_calories_dinner = calories_per_day * 0.05
 
-    #starter_recipes = favourite_recipes.filter(dish_type='starter')
     starter_recipes = list(favourite_recipes.filter(dish_type='starter'))
     random.shuffle(starter_recipes)
     for recipe in starter_recipes:
-        #starter_calories = calories_lunch_remaining * 0.1
         if recipe.calories <= starter_calories_dinner:
             menu['dinner']['starter'] = recipe
-            #calories_lunch_remaining -= recipe.calories
             break
 
-    #main_recipes = favourite_recipes.filter(dish_type='main')
     main_recipes = list(favourite_recipes.filter(dish_type='main'))
     random.shuffle(main_recipes)
     for recipe in main_recipes:
@@ -367,7 +340,6 @@ def get_menu(request):
             menu['dinner']['main'] = recipe
             break
 
-    #image.pngdessert_recipes = favourite_recipes.filter(dish_type='dessert')
     dessert_recipes = list(favourite_recipes.filter(dish_type='dessert'))
     random.shuffle(dessert_recipes)
     for recipe in dessert_recipes:

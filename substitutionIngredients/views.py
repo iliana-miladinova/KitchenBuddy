@@ -31,9 +31,6 @@ def get_substitute_ingredients(request, ingredient_id, recipe_id):
                 params = {'ingr':ingredient.name}
             )
         
-        # substitute_ingredients = []
-        # error = None
-        
             ing_data = ing_response.json()
             MY_KEY='hints'
 
@@ -51,7 +48,7 @@ def get_substitute_ingredients(request, ingredient_id, recipe_id):
                 if not substitute_ingredients:
                     error = 'No substitude ingredients found'
             else:
-                error = 'No substitudeingredients data found'
+                error = 'No substitude ingredients data found'
     except Exception as e:
         error = f"Error: {e}"
 

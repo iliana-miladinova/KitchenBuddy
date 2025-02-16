@@ -27,8 +27,6 @@ class TestCalorieTrackerViews(TestCase):
         
     def test_list_calorie_tracker(self):
         response = self.client.get(self.url)
-        #self.assertEqual(response.status_code, 200)
-        #self.assertTemplateUsed(response, 'calorieTracker/list_calorie_tracker.html')
         self.assertEqual(response.context['calories_sum'], 900)
         self.assertEqual(response.context['remaining_calories'], 1134)
         self.assertEqual(response.context['calorie_limit'], 2034)
